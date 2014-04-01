@@ -1,0 +1,12 @@
+
+http://jrrera.github.io/archive.html
+http://jrrera.github.io/atom.xml
+http://jrrera.github.io/categories.html
+http://jrrera.github.io/index.html
+http://jrrera.github.io/pages.html
+http://jrrera.github.io/rss.xml
+http://jrrera.github.io/sitemap.txt
+http://jrrera.github.io/tags.html
+
+http://jrrera.github.io/jon%20is%20awesome/2014/04/01/testpost
+http://jrrera.github.io/lessons/2011/12/29/jekyll-introduction

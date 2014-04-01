@@ -1,0 +1,14 @@
+<article class="unit-article layout-post">
+    <div class="unit-inner unit-article-inner">
+        <div class="content">
+            <div class="bd">
+            	<a href="{{ BASE_PATH }}{{ post.url }}"><h1>{{ post.title }}</h1></a>
+            	<small	>{{ post.date | date_to_string }}</small>
+            	<hr />
+                <div class="entry-content">
+                    {{ post.content }}
+                </div><!-- entry-content -->
+            </div><!-- bd -->
+        </div><!-- content -->
+    </div><!-- unit-inner -->
+</article>
