@@ -51,7 +51,8 @@
 
 			<div class="bd">
 				<div class="entry-content">
-					<p>Ironically, as I was trying to install Jekyll to set up this blog on Github, I ran into a lot of problems. The command-line error wasn’t too helpful but it looked something like this:</p>
+					
+<p>Ironically, as I was trying to install Jekyll to set up this blog on Github, I ran into a lot of problems. The command-line error wasn’t too helpful but it looked something like this:</p>
 
 <pre><code>Building native extensions.  This could take a while...
 ERROR:  Error installing jekyll:
@@ -60,35 +61,35 @@ ERROR:  Error installing jekyll:
     /System/Library/Frameworks/Ruby.framework/Versions/2.0/usr/bin/ruby extconf.rb
 creating Makefile
 
-make &quot;DESTDIR=&quot; clean
+make "DESTDIR=" clean
 
-make &quot;DESTDIR=&quot;
+make "DESTDIR="
 compiling porter.c
-porter.c:359:27: warning: &#39;&amp;&amp;&#39; within &#39;||&#39; [-Wlogical-op-parentheses]
+porter.c:359:27: warning: '&amp;&amp;' within '||' [-Wlogical-op-parentheses]
       if (a &gt; 1 || a == 1 &amp;&amp; !cvc(z, z-&gt;k - 1)) z-&gt;k--;
                 ~~ ~~~~~~~^~~~~~~~~~~~~~~~~~~~
-porter.c:359:27: note: place parentheses around the &#39;&amp;&amp;&#39; expression to silence this warning
+porter.c:359:27: note: place parentheses around the '&amp;&amp;' expression to silence this warning
       if (a &gt; 1 || a == 1 &amp;&amp; !cvc(z, z-&gt;k - 1)) z-&gt;k--;
                           ^
                    (                          )
 1 warning generated.
 compiling porter_wrap.c
 linking shared-object stemmer.bundle
-clang: error: unknown argument: &#39;-multiply_definedsuppress&#39; [-Wunused-command-line-argument-hard-error-in-future]
+clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]
 clang: note: this will be a hard error (cannot be downgraded to a warning) in the future
 make: *** [stemmer.bundle] Error 1
 
 make failed, exit code 2
 
 Gem files will remain installed in /Library/Ruby/Gems/2.0.0/gems/fast-stemmer-1.0.2 for inspection.
-Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/fast-stemmer-1.0.2/gem_make.out</code></pre>
+Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/fast-stemmer-1.0.2/gem_make.out
+</code></pre>
 
 <p>Both the <a href="http://jekyllrb.com/docs/troubleshooting/">Jekyll troubleshooting page</a> and StackOverflow recommended two ways to resolve installation issues:</p>
 
 <ul>
-<li>Making sure <a href="https://developer.apple.com/downloads/index.action?name=for%20Xcode%20-#">commandline tools</a> was installed</li>
-
-<li>Making sure RubyGems was up to date with <code>sudo gem update --system</code></li>
+  <li>Making sure <a href="https://developer.apple.com/downloads/index.action?name=for%20Xcode%20-#">commandline tools</a> was installed</li>
+  <li>Making sure RubyGems was up to date with <code>sudo gem update --system</code></li>
 </ul>
 
 <p>However, neither of these did the trick for me. Thankfully, after an hour of searching, I ended up finding the right clues <a href="http://stackoverflow.com/questions/22479246/how-to-install-jekyll-on-mac-osx-10-9-with-ruby-2-0-0">here</a>.</p>
@@ -96,6 +97,7 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 <p>As per the StackOverflow link above, I installed Homebrew and RVM, <a href="http://dean.io/setting-up-a-ruby-on-rails-development-environment-on-mavericks/">using this guide</a>; this did the trick. Success!</p>
 
 <p>While I do wonder why RVM / Homebrew was necessary, it seems to be working for others as well. Thought I’d call it out for any others struggling out there, as I had difficulty finding the right clues on Stack Overflow.</p>
+
 					<div class="meta">
 						<p class="date-publish">
 							Published: 
@@ -156,7 +158,7 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
   <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_developer = 1;
-    var disqus_shortname = 'jekyllbootstrap'; // required: replace example with your forum shortname
+    var disqus_shortname = 'jonthecodingnoob'; // required: replace example with your forum shortname
     
     /* * * DON'T EDIT BELOW THIS LINE * * */
     (function() {
@@ -180,6 +182,8 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 						<ul>
 							
 							
+							
+							<li class="next"><a class="internal" rel="next"  href="/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts" title="View A Better Way to Integrate AngularJS and Google Charts">A Better Way to Integrate AngularJS and Google Charts &raquo;</a></li>
 							
 						</ul>
 					</nav>

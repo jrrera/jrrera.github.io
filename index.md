@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Thoughts on JavaScript, AngularJS, Python & App Engine.
-tagline: Thoughts on JavaScript, AngularJS, Python & App Engine.
+title: Thoughts on JavaScript, AngularJS, and more 
+tagline: Thoughts on JavaScript, AngularJS, and more  – by Jonathan Guerrera
 ---
 {% include JB/setup %}
 

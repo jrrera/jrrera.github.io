@@ -4,7 +4,7 @@
  <title>Jon the Coding Noob</title>
  <link href="http://jrrera.github.io/" rel="self"/>
  <link href="http://jrrera.github.io"/>
- <updated>2014-04-04T10:14:25-07:00</updated>
+ <updated>2014-04-04T16:24:15-07:00</updated>
  <id>http://jrrera.github.io</id>
  <author>
    <name>Jonathan Guerrera</name>
@@ -13,11 +13,226 @@
 
  
  <entry>
+   <title>A Better Way to Integrate AngularJS and Google Charts</title>
+   <link href="http://jrrera.github.io/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts"/>
+   <updated>2014-04-05T00:00:00-07:00</updated>
+   <id>http://jrrera.github.io/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts</id>
+   <content type="html">
+&lt;p&gt;&lt;img src=&quot;/assets/img/AngularJS-large.png&quot; alt=&quot;AngularJS&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I’m fairly new to the world of web development (I &lt;a href=&quot;http://www.livingforimprovement.com/learning-to-code-fun-frustrating-fruitful/&quot;&gt;started coding&lt;/a&gt; a year and half ago), and one of my favorite discoveries thus far is AngularJS. &lt;/p&gt;
+
+&lt;p&gt;As with many people new to Angular, the hardest concept to grok was that of directives. Whenever you’d like to manipulate the dom in some way, a directive is how you do it. Additionally, directives (along with services) are a great way to integrate third party libraries and APIs with Angular.&lt;/p&gt;
+
+&lt;p&gt;I’ve recently been working on a small meditation timer app [LINK] and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with &lt;a href=&quot;http://gavindraper.com/2013/07/30/google-charts-in-angularjs/&quot;&gt;Gavin Draper’s article&lt;/a&gt; on how he did it.&lt;/p&gt;
+
+&lt;p&gt;However, I’ve come to find a few disadvantages with that implementation:&lt;/p&gt;
+
+&lt;h3 id=&quot;bootstrapping-angular&quot;&gt;Bootstrapping Angular&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;google.setOnLoadCallback(function () {  
+    angular.bootstrap(document.body, [&#39;my-app&#39;]);
+});
+google.load(&#39;visualization&#39;, &#39;1&#39;, {packages: [&#39;corechart&#39;]});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The given code here works just fine, but I noticed that Angular’s bootstrap function only runs once the Google Loader fires off the callback function.&lt;/p&gt;
+
+&lt;p&gt;By requiring the Google Loader callback to fire before bootstrapping the Angular application, if the Google Loader ever falters, the app simply won’t run. That felt like an unacceptable trade-off.&lt;/p&gt;
+
+&lt;p&gt;A better approach would be to wrap the Googe Loader in an Angular Service, which I’ll explain how I did later in this post.&lt;/p&gt;
+
+&lt;h3 id=&quot;nested-models&quot;&gt;Nested models&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;googleChart.directive(&quot;googleChart&quot;,function(){  
+    return{
+        restrict : &quot;A&quot;,
+        link: function($scope, $elem, $attr){
+            var dt = $scope[$attr.ngModel].dataTable;
+
+            var options = {};
+            if($scope[$attr.ngModel].title)
+                options.title = $scope[$attr.ngModel].title;
+
+            var googleChart = new google.visualization[$attr.googleChart]($elem[0]);
+            googleChart.draw(dt,options)
+        }
+    }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The directive wasn’t using Angular’s useful &lt;code&gt;$scope.$eval&lt;/code&gt; for reading attributes. Rather, it was passing the ngModel attribute directly to the &lt;code&gt;$scope&lt;/code&gt; object. If you had a nested model – a best practice in many situations – such as &lt;code&gt;$scope.chartModel.dataset1&lt;/code&gt;, the directive would break by trying to do something like this &lt;code&gt;var dt = $scope[&#39;chartModel.dataset1&#39;].dataTable;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;As I mentioned, a better approach would be to use &lt;code&gt;$scope.$eval&lt;/code&gt;, which will safely eval the attribute to give you access to the necessary model.&lt;/p&gt;
+
+&lt;h3 id=&quot;unit-testing&quot;&gt;Unit Testing&lt;/h3&gt;
+
+&lt;p&gt;The only other concern I had was, by calling google.load in the global scope, unit testing became more difficult. My Karma / Jasmine setup was failing because the google namespace wasn’t defined in the test environment when injecting my Angular app module. &lt;/p&gt;
+
+&lt;p&gt;Again, the way to avoid this problem is to keep the google namespace wrapped in an Angular Service so that it can be mocked and/or ignored in my various unit tests.&lt;/p&gt;
+
+&lt;h3 id=&quot;a-better-solution&quot;&gt;A Better Solution&lt;/h3&gt;
+
+&lt;p&gt;Given the drawbacks listed above, here’s how I ended up implementing Google Charts. I consider this to be a more ‘Angular’ way to do it, by relying more heavily on Angular services, watchers, and keeping the Google Loader in a nicely contained environment.&lt;/p&gt;
+
+&lt;p&gt;Let’s start with the DOM and the controller:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;DOM&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;google-chart=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;ColumnChart&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ng-model=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;dataModel.visual&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;trigger=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;activateChart&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that $scope.activateChart is going to be the trigger to build the chart. &lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Controller&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;controller&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ChartCtrl&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ChartService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    
+    &lt;span class=&quot;c1&quot;&gt;// activateChart flips to true once the Google &lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Loader callback fires&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;activateChart&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// This is where my data model will be stored.&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// &amp;quot;visual&amp;quot; will contain the chart&amp;#39;s datatable&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataModel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;visual&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;metaData&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// First, we attempt to load the Visualization module &lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;loadGoogle&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ChartService&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;loadGoogleVisualization&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    
+    &lt;span class=&quot;c1&quot;&gt;// If the Google Loader request was made with no errors, &lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// register a callback, and construct the chart data&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// model within the callback function&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;loadGoogle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setOnLoadCallback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;visual&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Set up the dataTable and columns&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;visualization&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DataTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addColumn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;string&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;Date&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addColumn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;number&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;Minutes&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            
+            &lt;span class=&quot;cm&quot;&gt;/* &lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;             * Populate row data here &lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;             */&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Update the model to activate the chart on the DOM&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Note the use of $scope.$apply since we&amp;#39;re in the &lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// Google Loader callback.&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;activateChart&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    
+            &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;  
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, let’s look at the &lt;strong&gt;Angular Service&lt;/strong&gt;. I chose to place google.load() in a try/catch block to guard against any errors that might spring up if any breaking changes are introduced in the future. &lt;/p&gt;
+
+&lt;p&gt;There’s also a quirk in the Google Loader worth noting: If you want to load an API &lt;em&gt;after&lt;/em&gt; the page renders, you need to add an arbitrary callback, otherwise the loader will use document.write(), which will overwrite all of the HTML on the page.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ChartService&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        
+        &lt;span class=&quot;cm&quot;&gt;/**&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;         * Loads the visualization module from the Google Charts API &lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;         * if available&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;         * @returns {boolean} - Returns true is successful, or false &lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;         * if not available&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;         */&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;loadGoogleVisualization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            
+            &lt;span class=&quot;c1&quot;&gt;// Using a try/catch block to guard against unanticipated &lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// errors when loading the visualization lib&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Arbitrary callback required in google.load() to &lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// support loading after initial page rendering&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;visualization&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;s1&quot;&gt;&amp;#39;callback&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;console.log(\&amp;#39;success\&amp;#39;);&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+                    &lt;span class=&quot;s1&quot;&gt;&amp;#39;packages&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;corechart&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+               
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;Could not load Google lib&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And finally, let’s take a look at the underlying directive.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Directive&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;directive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;googleChart&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;  
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;restrict&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;A&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;link&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$elem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Function to run when the trigger is activated&lt;/span&gt;
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;initChart&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Run $eval on the $scope model passed &lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// as an HTML attribute&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$eval&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ngModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                
+                &lt;span class=&quot;c1&quot;&gt;// If the model is defined on the scope,&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// grab the dataTable that was set up&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// during the Google Loader callback&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// function, and draw the chart&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;chartType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+                    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;title&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+                    
+                    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;visualization&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;chartType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$elem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+                    &lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+            &lt;span class=&quot;c1&quot;&gt;// Watch the scope value placed on the trigger attribute&lt;/span&gt;
+            &lt;span class=&quot;c1&quot;&gt;// if it ever flips to true, activate the chart&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$watch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;trigger&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;nx&quot;&gt;initChart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; 
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+            
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And there you have it! Google Visualization Charts right in your Angular application without any worries of bootstrapping the app in the face of a failure to load, unit testing difficulties, or data model restrictions. &lt;/p&gt;
+
+&lt;p&gt;Granted, I’m still a beginner to AngularJS (I’ve only been writing Angular apps for 7-8 months now), so if you see any faults here, definitely point it out in the comments below!&lt;/p&gt;
+
+&lt;p&gt;-Jon&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>Installing Jekyll on OS X 10.9.2</title>
    <link href="http://jrrera.github.io/2014/04/04/installing-jekyll-on-os-x-1092"/>
    <updated>2014-04-04T00:00:00-07:00</updated>
    <id>http://jrrera.github.io/2014/04/04/installing-jekyll-on-os-x-1092</id>
-   <content type="html">&lt;p&gt;Ironically, as I was trying to install Jekyll to set up this blog on Github, I ran into a lot of problems. The command-line error wasn’t too helpful but it looked something like this:&lt;/p&gt;
+   <content type="html">
+&lt;p&gt;Ironically, as I was trying to install Jekyll to set up this blog on Github, I ran into a lot of problems. The command-line error wasn’t too helpful but it looked something like this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Building native extensions.  This could take a while...
 ERROR:  Error installing jekyll:
@@ -26,42 +241,43 @@ ERROR:  Error installing jekyll:
     /System/Library/Frameworks/Ruby.framework/Versions/2.0/usr/bin/ruby extconf.rb
 creating Makefile
 
-make &amp;quot;DESTDIR=&amp;quot; clean
+make &quot;DESTDIR=&quot; clean
 
-make &amp;quot;DESTDIR=&amp;quot;
+make &quot;DESTDIR=&quot;
 compiling porter.c
-porter.c:359:27: warning: &amp;#39;&amp;amp;&amp;amp;&amp;#39; within &amp;#39;||&amp;#39; [-Wlogical-op-parentheses]
+porter.c:359:27: warning: &#39;&amp;amp;&amp;amp;&#39; within &#39;||&#39; [-Wlogical-op-parentheses]
       if (a &amp;gt; 1 || a == 1 &amp;amp;&amp;amp; !cvc(z, z-&amp;gt;k - 1)) z-&amp;gt;k--;
                 ~~ ~~~~~~~^~~~~~~~~~~~~~~~~~~~
-porter.c:359:27: note: place parentheses around the &amp;#39;&amp;amp;&amp;amp;&amp;#39; expression to silence this warning
+porter.c:359:27: note: place parentheses around the &#39;&amp;amp;&amp;amp;&#39; expression to silence this warning
       if (a &amp;gt; 1 || a == 1 &amp;amp;&amp;amp; !cvc(z, z-&amp;gt;k - 1)) z-&amp;gt;k--;
                           ^
                    (                          )
 1 warning generated.
 compiling porter_wrap.c
 linking shared-object stemmer.bundle
-clang: error: unknown argument: &amp;#39;-multiply_definedsuppress&amp;#39; [-Wunused-command-line-argument-hard-error-in-future]
+clang: error: unknown argument: &#39;-multiply_definedsuppress&#39; [-Wunused-command-line-argument-hard-error-in-future]
 clang: note: this will be a hard error (cannot be downgraded to a warning) in the future
 make: *** [stemmer.bundle] Error 1
 
 make failed, exit code 2
 
 Gem files will remain installed in /Library/Ruby/Gems/2.0.0/gems/fast-stemmer-1.0.2 for inspection.
-Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/fast-stemmer-1.0.2/gem_make.out&lt;/code&gt;&lt;/pre&gt;
+Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/fast-stemmer-1.0.2/gem_make.out
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Both the &lt;a href=&quot;http://jekyllrb.com/docs/troubleshooting/&quot;&gt;Jekyll troubleshooting page&lt;/a&gt; and StackOverflow recommended two ways to resolve installation issues:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Making sure &lt;a href=&quot;https://developer.apple.com/downloads/index.action?name=for%20Xcode%20-#&quot;&gt;commandline tools&lt;/a&gt; was installed&lt;/li&gt;
-
-&lt;li&gt;Making sure RubyGems was up to date with &lt;code&gt;sudo gem update --system&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Making sure &lt;a href=&quot;https://developer.apple.com/downloads/index.action?name=for%20Xcode%20-#&quot;&gt;commandline tools&lt;/a&gt; was installed&lt;/li&gt;
+  &lt;li&gt;Making sure RubyGems was up to date with &lt;code&gt;sudo gem update --system&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;However, neither of these did the trick for me. Thankfully, after an hour of searching, I ended up finding the right clues &lt;a href=&quot;http://stackoverflow.com/questions/22479246/how-to-install-jekyll-on-mac-osx-10-9-with-ruby-2-0-0&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;As per the StackOverflow link above, I installed Homebrew and RVM, &lt;a href=&quot;http://dean.io/setting-up-a-ruby-on-rails-development-environment-on-mavericks/&quot;&gt;using this guide&lt;/a&gt;; this did the trick. Success!&lt;/p&gt;
 
-&lt;p&gt;While I do wonder why RVM / Homebrew was necessary, it seems to be working for others as well. Thought I’d call it out for any others struggling out there, as I had difficulty finding the right clues on Stack Overflow.&lt;/p&gt;</content>
+&lt;p&gt;While I do wonder why RVM / Homebrew was necessary, it seems to be working for others as well. Thought I’d call it out for any others struggling out there, as I had difficulty finding the right clues on Stack Overflow.&lt;/p&gt;
+</content>
  </entry>
  
  

@@ -242,6 +242,11 @@ pre {
   margin-top: 0;
   margin-bottom: 0;
 }
+
+.unit-article h1 {
+  color: black;
+}
+
 .unit-article .entry-content h2,
 .unit-article .entry-content h3,
 .unit-article .entry-content h4,
@@ -281,12 +286,15 @@ pre {
   margin-top: 0;
 }
 .unit-article a:link {
+  color: blue;
   border-bottom: 1px dotted #99cc99;
 }
 .unit-article a:visited {
+  color: DarkBlue;
   border-bottom: 1px dotted #77bb77;
 }
 .unit-article a:hover {
+  color: DarkBlue;
   border-bottom: 1px dotted #bbddbb;
 }
 .unit-article blockquote {

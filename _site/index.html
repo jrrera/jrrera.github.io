@@ -7,10 +7,10 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Thoughts on JavaScript, AngularJS, Python & App Engine.</title>
+	<title>Thoughts on JavaScript, AngularJS, and more</title>
 	<meta name="author" content="Jonathan Guerrera">
 	<link href='/assets/themes/the-minimum/css/style.css' rel="stylesheet" media="all">
-	<link href="http://feeds.feedburner.com/" rel="alternate" title="Thoughts on JavaScript, AngularJS, Python & App Engine." type="application/atom+xml">
+	<link href="http://feeds.feedburner.com/" rel="alternate" title="Thoughts on JavaScript, AngularJS, and more" type="application/atom+xml">
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.0.6/modernizr.min.js"></script>
 </head>
 <body>
@@ -44,30 +44,257 @@
 			<header>
 				<div class="unit-head">
 					<div class="unit-inner unit-head-inner">
-						<h1 class="h2 entry-title">Thoughts on JavaScript, AngularJS, Python & App Engine.</h1>
+						<h1 class="h2 entry-title">Thoughts on JavaScript, AngularJS, and more</h1>
 					</div><!-- unit-inner -->
 				</div><!-- unit-head -->
 			</header>
 
 			<div class="bd">
 				<div class="entry-content">
-					<ul class='posts'>
+					
+<ul class="posts">
   <!--This code just lists out each posts title next a date with a link. Removing-->
 <!--   
+    <li><span>05 Apr 2014</span> &raquo; <a href="/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts">A Better Way to Integrate AngularJS and Google Charts</a></li>
+  
     <li><span>04 Apr 2014</span> &raquo; <a href="/2014/04/04/installing-jekyll-on-os-x-1092">Installing Jekyll on OS X 10.9.2</a></li>
    -->
 
   <!--Added by Jon from: http://stackoverflow.com/questions/9794699/listing-all-the-blog-posts-with-content-with-jekyll-->
   
-    <article class='unit-article layout-post'>
-    <div class='unit-inner unit-article-inner'>
-        <div class='content'>
-            <div class='bd'>
-            	<a href='/2014/04/04/installing-jekyll-on-os-x-1092'><h1>Installing Jekyll on OS X 10.9.2</h1></a>
+    <article class="unit-article layout-post">
+    <div class="unit-inner unit-article-inner">
+        <div class="content">
+            <div class="bd">
+            	<a href="/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts"><h1>A Better Way to Integrate AngularJS and Google Charts</h1></a>
+            	<small>05 Apr 2014</small>
+            	<hr />
+                <div class="entry-content">
+                    
+<p><img src="/assets/img/AngularJS-large.png" alt="AngularJS" /></p>
+
+<p>I’m fairly new to the world of web development (I <a href="http://www.livingforimprovement.com/learning-to-code-fun-frustrating-fruitful/">started coding</a> a year and half ago), and one of my favorite discoveries thus far is AngularJS. </p>
+
+<p>As with many people new to Angular, the hardest concept to grok was that of directives. Whenever you’d like to manipulate the dom in some way, a directive is how you do it. Additionally, directives (along with services) are a great way to integrate third party libraries and APIs with Angular.</p>
+
+<p>I’ve recently been working on a small meditation timer app [LINK] and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with <a href="http://gavindraper.com/2013/07/30/google-charts-in-angularjs/">Gavin Draper’s article</a> on how he did it.</p>
+
+<p>However, I’ve come to find a few disadvantages with that implementation:</p>
+
+<h3 id="bootstrapping-angular">Bootstrapping Angular</h3>
+
+<pre><code class="language-javascript">google.setOnLoadCallback(function () {  
+    angular.bootstrap(document.body, ['my-app']);
+});
+google.load('visualization', '1', {packages: ['corechart']});
+</code></pre>
+
+<p>The given code here works just fine, but I noticed that Angular’s bootstrap function only runs once the Google Loader fires off the callback function.</p>
+
+<p>By requiring the Google Loader callback to fire before bootstrapping the Angular application, if the Google Loader ever falters, the app simply won’t run. That felt like an unacceptable trade-off.</p>
+
+<p>A better approach would be to wrap the Googe Loader in an Angular Service, which I’ll explain how I did later in this post.</p>
+
+<h3 id="nested-models">Nested models</h3>
+
+<pre><code class="language-javascript">googleChart.directive("googleChart",function(){  
+    return{
+        restrict : "A",
+        link: function($scope, $elem, $attr){
+            var dt = $scope[$attr.ngModel].dataTable;
+
+            var options = {};
+            if($scope[$attr.ngModel].title)
+                options.title = $scope[$attr.ngModel].title;
+
+            var googleChart = new google.visualization[$attr.googleChart]($elem[0]);
+            googleChart.draw(dt,options)
+        }
+    }
+});
+</code></pre>
+
+<p>The directive wasn’t using Angular’s useful <code>$scope.$eval</code> for reading attributes. Rather, it was passing the ngModel attribute directly to the <code>$scope</code> object. If you had a nested model – a best practice in many situations – such as <code>$scope.chartModel.dataset1</code>, the directive would break by trying to do something like this <code>var dt = $scope['chartModel.dataset1'].dataTable;</code></p>
+
+<p>As I mentioned, a better approach would be to use <code>$scope.$eval</code>, which will safely eval the attribute to give you access to the necessary model.</p>
+
+<h3 id="unit-testing">Unit Testing</h3>
+
+<p>The only other concern I had was, by calling google.load in the global scope, unit testing became more difficult. My Karma / Jasmine setup was failing because the google namespace wasn’t defined in the test environment when injecting my Angular app module. </p>
+
+<p>Again, the way to avoid this problem is to keep the google namespace wrapped in an Angular Service so that it can be mocked and/or ignored in my various unit tests.</p>
+
+<h3 id="a-better-solution">A Better Solution</h3>
+
+<p>Given the drawbacks listed above, here’s how I ended up implementing Google Charts. I consider this to be a more ‘Angular’ way to do it, by relying more heavily on Angular services, watchers, and keeping the Google Loader in a nicely contained environment.</p>
+
+<p>Let’s start with the DOM and the controller:</p>
+
+<p><strong>DOM</strong>:</p>
+
+<div class="highlight"><pre><code class="html"><span class="nt">&lt;div</span> <span class="na">google-chart=</span><span class="s">&quot;ColumnChart&quot;</span> <span class="na">ng-model=</span><span class="s">&quot;dataModel.visual&quot;</span> <span class="na">trigger=</span><span class="s">&quot;activateChart&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+</code></pre></div>
+
+<p>Note that $scope.activateChart is going to be the trigger to build the chart. </p>
+
+<p><strong>Controller</strong>:</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s1">&#39;ChartCtrl&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">ChartService</span><span class="p">)</span> <span class="p">{</span>
+    
+    <span class="c1">// activateChart flips to true once the Google </span>
+    <span class="c1">// Loader callback fires</span>
+    <span class="nx">$scope</span><span class="p">.</span><span class="nx">activateChart</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+    <span class="c1">// This is where my data model will be stored.</span>
+    <span class="c1">// &quot;visual&quot; will contain the chart&#39;s datatable</span>
+    <span class="nx">$scope</span><span class="p">.</span><span class="nx">dataModel</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">visual</span><span class="o">:</span> <span class="p">{},</span>
+        <span class="nx">metaData</span><span class="o">:</span> <span class="p">{},</span>
+        <span class="nx">data</span><span class="o">:</span> <span class="p">{}</span>
+    <span class="p">};</span>
+
+    <span class="c1">// First, we attempt to load the Visualization module </span>
+    <span class="kd">var</span> <span class="nx">loadGoogle</span> <span class="o">=</span> <span class="nx">ChartService</span><span class="p">.</span><span class="nx">loadGoogleVisualization</span><span class="p">();</span>
+    
+    <span class="c1">// If the Google Loader request was made with no errors, </span>
+    <span class="c1">// register a callback, and construct the chart data</span>
+    <span class="c1">// model within the callback function</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">loadGoogle</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="nx">google</span><span class="p">.</span><span class="nx">setOnLoadCallback</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+            <span class="kd">var</span> <span class="nx">dataTable</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">dataModel</span><span class="p">.</span><span class="nx">visual</span><span class="p">.</span><span class="nx">dataTable</span><span class="p">;</span>
+
+            <span class="c1">// Set up the dataTable and columns</span>
+            <span class="nx">dataTable</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">visualization</span><span class="p">.</span><span class="nx">DataTable</span><span class="p">();</span>
+            <span class="nx">dataTable</span><span class="p">.</span><span class="nx">addColumn</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span>
+            <span class="nx">dataTable</span><span class="p">.</span><span class="nx">addColumn</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">,</span><span class="s2">&quot;Minutes&quot;</span><span class="p">)</span>
+            
+            <span class="cm">/* </span>
+<span class="cm">             * Populate row data here </span>
+<span class="cm">             */</span>
+
+            <span class="c1">// Update the model to activate the chart on the DOM</span>
+            <span class="c1">// Note the use of $scope.$apply since we&#39;re in the </span>
+            <span class="c1">// Google Loader callback.</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">activateChart</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>    
+            <span class="p">});</span>
+        <span class="p">});</span>  
+    <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>Next, let’s look at the <strong>Angular Service</strong>. I chose to place google.load() in a try/catch block to guard against any errors that might spring up if any breaking changes are introduced in the future. </p>
+
+<p>There’s also a quirk in the Google Loader worth noting: If you want to load an API <em>after</em> the page renders, you need to add an arbitrary callback, otherwise the loader will use document.write(), which will overwrite all of the HTML on the page.</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="nx">app</span><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="s1">&#39;ChartService&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        
+        <span class="cm">/**</span>
+<span class="cm">         * Loads the visualization module from the Google Charts API </span>
+<span class="cm">         * if available</span>
+<span class="cm">         * @returns {boolean} - Returns true is successful, or false </span>
+<span class="cm">         * if not available</span>
+<span class="cm">         */</span>
+        <span class="nx">loadGoogleVisualization</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            
+            <span class="c1">// Using a try/catch block to guard against unanticipated </span>
+            <span class="c1">// errors when loading the visualization lib</span>
+            <span class="k">try</span> <span class="p">{</span>
+
+                <span class="c1">// Arbitrary callback required in google.load() to </span>
+                <span class="c1">// support loading after initial page rendering</span>
+                <span class="nx">google</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s1">&#39;visualization&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="s1">&#39;callback&#39;</span><span class="o">:</span><span class="s1">&#39;console.log(\&#39;success\&#39;);&#39;</span><span class="p">,</span> 
+                    <span class="s1">&#39;packages&#39;</span><span class="o">:</span><span class="p">[</span><span class="s1">&#39;corechart&#39;</span><span class="p">]</span>
+                <span class="p">});</span>
+               
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            
+            <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Could not load Google lib&#39;</span><span class="p">,</span> <span class="nx">e</span><span class="p">);</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>  
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+    <span class="p">};</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>And finally, let’s take a look at the underlying directive.</p>
+
+<p><strong>Directive</strong>:</p>
+
+<div class="highlight"><pre><code class="javascript"><span class="nx">app</span><span class="p">.</span><span class="nx">directive</span><span class="p">(</span><span class="s2">&quot;googleChart&quot;</span><span class="p">,</span><span class="kd">function</span><span class="p">(){</span>  
+    <span class="k">return</span><span class="p">{</span>
+        <span class="nx">restrict</span> <span class="o">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+        <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">$elem</span><span class="p">,</span> <span class="nx">$attr</span><span class="p">){</span>
+            <span class="kd">var</span> <span class="nx">model</span><span class="p">;</span>
+
+            <span class="c1">// Function to run when the trigger is activated</span>
+            <span class="kd">var</span> <span class="nx">initChart</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+                <span class="c1">// Run $eval on the $scope model passed </span>
+                <span class="c1">// as an HTML attribute</span>
+                <span class="nx">model</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">$eval</span><span class="p">(</span><span class="nx">$attr</span><span class="p">.</span><span class="nx">ngModel</span><span class="p">);</span>
+                
+                <span class="c1">// If the model is defined on the scope,</span>
+                <span class="c1">// grab the dataTable that was set up</span>
+                <span class="c1">// during the Google Loader callback</span>
+                <span class="c1">// function, and draw the chart</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">model</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">dt</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">dataTable</span><span class="p">,</span>
+                        <span class="nx">options</span> <span class="o">=</span> <span class="p">{},</span>
+                        <span class="nx">chartType</span> <span class="o">=</span> <span class="nx">$attr</span><span class="p">.</span><span class="nx">googleChart</span><span class="p">;</span>
+
+                    <span class="k">if</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">title</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">options</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">title</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    
+                    <span class="kd">var</span> <span class="nx">googleChart</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">visualization</span><span class="p">[</span><span class="nx">chartType</span><span class="p">](</span><span class="nx">$elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                    <span class="nx">googleChart</span><span class="p">.</span><span class="nx">draw</span><span class="p">(</span><span class="nx">dt</span><span class="p">,</span><span class="nx">options</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+
+            <span class="c1">// Watch the scope value placed on the trigger attribute</span>
+            <span class="c1">// if it ever flips to true, activate the chart</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">$watch</span><span class="p">(</span><span class="nx">$attr</span><span class="p">.</span><span class="nx">trigger</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">){</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">val</span> <span class="o">===</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">initChart</span><span class="p">();</span> 
+                <span class="p">}</span>
+            <span class="p">});</span>
+            
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>And there you have it! Google Visualization Charts right in your Angular application without any worries of bootstrapping the app in the face of a failure to load, unit testing difficulties, or data model restrictions. </p>
+
+<p>Granted, I’m still a beginner to AngularJS (I’ve only been writing Angular apps for 7-8 months now), so if you see any faults here, definitely point it out in the comments below!</p>
+
+<p>-Jon</p>
+
+                </div><!-- entry-content -->
+            </div><!-- bd -->
+        </div><!-- content -->
+    </div><!-- unit-inner -->
+    <hr />
+    <hr />
+</article>
+  
+    <article class="unit-article layout-post">
+    <div class="unit-inner unit-article-inner">
+        <div class="content">
+            <div class="bd">
+            	<a href="/2014/04/04/installing-jekyll-on-os-x-1092"><h1>Installing Jekyll on OS X 10.9.2</h1></a>
             	<small>04 Apr 2014</small>
             	<hr />
-                <div class='entry-content'>
-                    <p>Ironically, as I was trying to install Jekyll to set up this blog on Github, I ran into a lot of problems. The command-line error wasn’t too helpful but it looked something like this:</p>
+                <div class="entry-content">
+                    
+<p>Ironically, as I was trying to install Jekyll to set up this blog on Github, I ran into a lot of problems. The command-line error wasn’t too helpful but it looked something like this:</p>
 
 <pre><code>Building native extensions.  This could take a while...
 ERROR:  Error installing jekyll:
@@ -76,42 +303,43 @@ ERROR:  Error installing jekyll:
     /System/Library/Frameworks/Ruby.framework/Versions/2.0/usr/bin/ruby extconf.rb
 creating Makefile
 
-make &quot;DESTDIR=&quot; clean
+make "DESTDIR=" clean
 
-make &quot;DESTDIR=&quot;
+make "DESTDIR="
 compiling porter.c
-porter.c:359:27: warning: &#39;&amp;&amp;&#39; within &#39;||&#39; [-Wlogical-op-parentheses]
+porter.c:359:27: warning: '&amp;&amp;' within '||' [-Wlogical-op-parentheses]
       if (a &gt; 1 || a == 1 &amp;&amp; !cvc(z, z-&gt;k - 1)) z-&gt;k--;
                 ~~ ~~~~~~~^~~~~~~~~~~~~~~~~~~~
-porter.c:359:27: note: place parentheses around the &#39;&amp;&amp;&#39; expression to silence this warning
+porter.c:359:27: note: place parentheses around the '&amp;&amp;' expression to silence this warning
       if (a &gt; 1 || a == 1 &amp;&amp; !cvc(z, z-&gt;k - 1)) z-&gt;k--;
                           ^
                    (                          )
 1 warning generated.
 compiling porter_wrap.c
 linking shared-object stemmer.bundle
-clang: error: unknown argument: &#39;-multiply_definedsuppress&#39; [-Wunused-command-line-argument-hard-error-in-future]
+clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]
 clang: note: this will be a hard error (cannot be downgraded to a warning) in the future
 make: *** [stemmer.bundle] Error 1
 
 make failed, exit code 2
 
 Gem files will remain installed in /Library/Ruby/Gems/2.0.0/gems/fast-stemmer-1.0.2 for inspection.
-Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/fast-stemmer-1.0.2/gem_make.out</code></pre>
+Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/fast-stemmer-1.0.2/gem_make.out
+</code></pre>
 
-<p>Both the <a href='http://jekyllrb.com/docs/troubleshooting/'>Jekyll troubleshooting page</a> and StackOverflow recommended two ways to resolve installation issues:</p>
+<p>Both the <a href="http://jekyllrb.com/docs/troubleshooting/">Jekyll troubleshooting page</a> and StackOverflow recommended two ways to resolve installation issues:</p>
 
 <ul>
-<li>Making sure <a href='https://developer.apple.com/downloads/index.action?name=for%20Xcode%20-#'>commandline tools</a> was installed</li>
-
-<li>Making sure RubyGems was up to date with <code>sudo gem update --system</code></li>
+  <li>Making sure <a href="https://developer.apple.com/downloads/index.action?name=for%20Xcode%20-#">commandline tools</a> was installed</li>
+  <li>Making sure RubyGems was up to date with <code>sudo gem update --system</code></li>
 </ul>
 
-<p>However, neither of these did the trick for me. Thankfully, after an hour of searching, I ended up finding the right clues <a href='http://stackoverflow.com/questions/22479246/how-to-install-jekyll-on-mac-osx-10-9-with-ruby-2-0-0'>here</a>.</p>
+<p>However, neither of these did the trick for me. Thankfully, after an hour of searching, I ended up finding the right clues <a href="http://stackoverflow.com/questions/22479246/how-to-install-jekyll-on-mac-osx-10-9-with-ruby-2-0-0">here</a>.</p>
 
-<p>As per the StackOverflow link above, I installed Homebrew and RVM, <a href='http://dean.io/setting-up-a-ruby-on-rails-development-environment-on-mavericks/'>using this guide</a>; this did the trick. Success!</p>
+<p>As per the StackOverflow link above, I installed Homebrew and RVM, <a href="http://dean.io/setting-up-a-ruby-on-rails-development-environment-on-mavericks/">using this guide</a>; this did the trick. Success!</p>
 
 <p>While I do wonder why RVM / Homebrew was necessary, it seems to be working for others as well. Thought I’d call it out for any others struggling out there, as I had difficulty finding the right clues on Stack Overflow.</p>
+
                 </div><!-- entry-content -->
             </div><!-- bd -->
         </div><!-- content -->
@@ -121,6 +349,7 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 </article>
   
 </ul>
+
 				</div><!-- entry-content -->
 			</div><!-- bd -->
 
