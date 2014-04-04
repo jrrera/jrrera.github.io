@@ -20,12 +20,12 @@ However, I've come to find a few disadvantages with that implementation:
 
 ### Bootstrapping Angular ###
 
-~~~ javascript
+{% highlight javascript %}
 google.setOnLoadCallback(function () {  
     angular.bootstrap(document.body, ['my-app']);
 });
 google.load('visualization', '1', {packages: ['corechart']});
-~~~
+{% endhighlight %}
 
 The given code here works just fine, but I noticed that Angular's bootstrap function only runs once the Google Loader fires off the callback function.
 
@@ -35,7 +35,7 @@ A better approach would be to wrap the Googe Loader in an Angular Service, which
 
 ### Nested models ###
 
-~~~ javascript
+{% highlight javascript %}
 googleChart.directive("googleChart",function(){  
     return{
         restrict : "A",
@@ -51,7 +51,7 @@ googleChart.directive("googleChart",function(){
         }
     }
 });
-~~~
+{% endhighlight %}
 
 The directive wasn't using Angular's useful `$scope.$eval` for reading attributes. Rather, it was passing the ngModel attribute directly to the `$scope` object. If you had a nested model – a best practice in many situations – such as `$scope.chartModel.dataset1`, the directive would break by trying to do something like this `var dt = $scope['chartModel.dataset1'].dataTable;`
 
