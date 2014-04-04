@@ -27,7 +27,7 @@ google.setOnLoadCallback(function () {
 google.load('visualization', '1', {packages: ['corechart']});
 {% endhighlight %}
 
-The given code here works just fine, but I noticed that Angular's bootstrap function only runs once the Google Loader fires off the callback function.
+This is the code used to initialize the Angular application in Gavin's post. The given code here works just fine, but I noticed that Angular's bootstrap function only runs once the Google Loader fires off the callback function.
 
 By requiring the Google Loader callback to fire before bootstrapping the Angular application, if the Google Loader ever falters, the app simply won't run. That felt like an unacceptable trade-off.
 
@@ -53,7 +53,7 @@ googleChart.directive("googleChart",function(){
 });
 {% endhighlight %}
 
-The directive wasn't using Angular's useful `$scope.$eval` for reading attributes. Rather, it was passing the ngModel attribute directly to the `$scope` object. If you had a nested model – a best practice in many situations – such as `$scope.chartModel.dataset1`, the directive would break by trying to do something like this `var dt = $scope['chartModel.dataset1'].dataTable;`
+The directive used in Gavin's article wasn't utilizing Angular's useful `$scope.$eval` for [reading attributes](http://stackoverflow.com/questions/15671471/angular-js-how-does-eval-work-and-why-is-it-different-from-vanilla-eval). Rather, it was passing the ngModel attribute directly to the `$scope` object. If you had a nested model – a best practice in many situations – such as `$scope.chartModel.dataset1`, the directive would break by trying to do something like this `var dt = $scope['chartModel.dataset1'].dataTable;`
 
 As I mentioned, a better approach would be to use `$scope.$eval`, which will safely eval the attribute to give you access to the necessary model.
 
