@@ -2,8 +2,8 @@
 layout: post
 title: "A Better Way to Integrate AngularJS and Google Charts"
 description: ""
-category: 
-tags: []
+category: AngularJS
+tags: ['AngularJS', 'Google Visualization API']
 ---
 {% include JB/setup %}
 
