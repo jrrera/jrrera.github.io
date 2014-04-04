@@ -16,7 +16,7 @@ As with many people new to Angular, the hardest concept to grok was that of dire
 
 I've recently been working on a small [meditation timer app](https://github.com/jrrera/minimal-meditation) and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with [Gavin Draper's article](http://gavindraper.com/2013/07/30/google-charts-in-angularjs/) on how he did it.
 
-However, I've come to find a few disadvantages with that implementation:
+His code samples were fantastic for getting me up and running. But as I continued to work on the application, I found a few disadvantages with that implementation, and figured it never hurts to improve on the great content of others. Here are a few areas I wanted to work on:
 
 ### Bootstrapping Angular ###
 
