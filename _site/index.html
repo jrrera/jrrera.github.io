@@ -55,7 +55,7 @@
 <ul class="posts">
   <!--This code just lists out each posts title next a date with a link. Removing-->
 <!--   
-    <li><span>05 Apr 2014</span> &raquo; <a href="/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts">A Better Way to Integrate AngularJS and Google Charts</a></li>
+    <li><span>05 Apr 2014</span> &raquo; <a href="/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts">A Better Way to Integrate AngularJS and Google Charts</a></li>
   
     <li><span>04 Apr 2014</span> &raquo; <a href="/2014/04/04/installing-jekyll-on-os-x-1092">Installing Jekyll on OS X 10.9.2</a></li>
    -->
@@ -66,7 +66,7 @@
     <div class="unit-inner unit-article-inner">
         <div class="content">
             <div class="bd">
-            	<a href="/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts"><h1>A Better Way to Integrate AngularJS and Google Charts</h1></a>
+            	<a href="/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts"><h1>A Better Way to Integrate AngularJS and Google Charts</h1></a>
             	<small>05 Apr 2014</small>
             	<hr />
                 <div class="entry-content">
@@ -77,19 +77,19 @@
 
 <p>As with many people new to Angular, the hardest concept to grok was that of directives. Whenever you’d like to manipulate the dom in some way, a directive is how you do it. Additionally, directives (along with services) are a great way to integrate third party libraries and APIs with Angular.</p>
 
-<p>I’ve recently been working on a small meditation timer app [LINK] and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with <a href="http://gavindraper.com/2013/07/30/google-charts-in-angularjs/">Gavin Draper’s article</a> on how he did it.</p>
+<p>I’ve recently been working on a small <a href="https://github.com/jrrera/minimal-meditation">meditation timer app</a> and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with <a href="http://gavindraper.com/2013/07/30/google-charts-in-angularjs/">Gavin Draper’s article</a> on how he did it.</p>
 
-<p>However, I’ve come to find a few disadvantages with that implementation:</p>
+<p>His code samples were fantastic for getting me up and running. But as I continued to work on the application, I found a few disadvantages with that implementation, and figured it never hurts to improve on the great content of others. Here are a few areas I wanted to work on:</p>
 
 <h3 id="bootstrapping-angular">Bootstrapping Angular</h3>
 
-<pre><code class="language-javascript">google.setOnLoadCallback(function () {  
-    angular.bootstrap(document.body, ['my-app']);
-});
-google.load('visualization', '1', {packages: ['corechart']});
-</code></pre>
+<div class="highlight"><pre><code class="javascript"><span class="nx">google</span><span class="p">.</span><span class="nx">setOnLoadCallback</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>  
+    <span class="nx">angular</span><span class="p">.</span><span class="nx">bootstrap</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;my-app&#39;</span><span class="p">]);</span>
+<span class="p">});</span>
+<span class="nx">google</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s1">&#39;visualization&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">packages</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;corechart&#39;</span><span class="p">]});</span>
+</code></pre></div>
 
-<p>The given code here works just fine, but I noticed that Angular’s bootstrap function only runs once the Google Loader fires off the callback function.</p>
+<p>This is the code used to initialize the Angular application in Gavin’s post. The given code here works just fine, but I noticed that Angular’s bootstrap function only runs once the Google Loader fires off the callback function.</p>
 
 <p>By requiring the Google Loader callback to fire before bootstrapping the Angular application, if the Google Loader ever falters, the app simply won’t run. That felt like an unacceptable trade-off.</p>
 
@@ -97,24 +97,24 @@ google.load('visualization', '1', {packages: ['corechart']});
 
 <h3 id="nested-models">Nested models</h3>
 
-<pre><code class="language-javascript">googleChart.directive("googleChart",function(){  
-    return{
-        restrict : "A",
-        link: function($scope, $elem, $attr){
-            var dt = $scope[$attr.ngModel].dataTable;
+<div class="highlight"><pre><code class="javascript"><span class="nx">googleChart</span><span class="p">.</span><span class="nx">directive</span><span class="p">(</span><span class="s2">&quot;googleChart&quot;</span><span class="p">,</span><span class="kd">function</span><span class="p">(){</span>  
+    <span class="k">return</span><span class="p">{</span>
+        <span class="nx">restrict</span> <span class="o">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+        <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">$elem</span><span class="p">,</span> <span class="nx">$attr</span><span class="p">){</span>
+            <span class="kd">var</span> <span class="nx">dt</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">[</span><span class="nx">$attr</span><span class="p">.</span><span class="nx">ngModel</span><span class="p">].</span><span class="nx">dataTable</span><span class="p">;</span>
 
-            var options = {};
-            if($scope[$attr.ngModel].title)
-                options.title = $scope[$attr.ngModel].title;
+            <span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">$scope</span><span class="p">[</span><span class="nx">$attr</span><span class="p">.</span><span class="nx">ngModel</span><span class="p">].</span><span class="nx">title</span><span class="p">)</span>
+                <span class="nx">options</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">[</span><span class="nx">$attr</span><span class="p">.</span><span class="nx">ngModel</span><span class="p">].</span><span class="nx">title</span><span class="p">;</span>
 
-            var googleChart = new google.visualization[$attr.googleChart]($elem[0]);
-            googleChart.draw(dt,options)
-        }
-    }
-});
-</code></pre>
+            <span class="kd">var</span> <span class="nx">googleChart</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">visualization</span><span class="p">[</span><span class="nx">$attr</span><span class="p">.</span><span class="nx">googleChart</span><span class="p">](</span><span class="nx">$elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+            <span class="nx">googleChart</span><span class="p">.</span><span class="nx">draw</span><span class="p">(</span><span class="nx">dt</span><span class="p">,</span><span class="nx">options</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
 
-<p>The directive wasn’t using Angular’s useful <code>$scope.$eval</code> for reading attributes. Rather, it was passing the ngModel attribute directly to the <code>$scope</code> object. If you had a nested model – a best practice in many situations – such as <code>$scope.chartModel.dataset1</code>, the directive would break by trying to do something like this <code>var dt = $scope['chartModel.dataset1'].dataTable;</code></p>
+<p>The directive used in Gavin’s article wasn’t utilizing Angular’s useful <code>$scope.$eval</code> for <a href="http://stackoverflow.com/questions/15671471/angular-js-how-does-eval-work-and-why-is-it-different-from-vanilla-eval">reading attributes</a>. Rather, it was passing the ngModel attribute directly to the <code>$scope</code> object. If you had a nested model – a best practice in many situations – such as <code>$scope.chartModel.dataset1</code>, the directive would break by trying to do something like this <code>var dt = $scope['chartModel.dataset1'].dataTable;</code></p>
 
 <p>As I mentioned, a better approach would be to use <code>$scope.$eval</code>, which will safely eval the attribute to give you access to the necessary model.</p>
 
@@ -271,9 +271,9 @@ google.load('visualization', '1', {packages: ['corechart']});
 <span class="p">});</span>
 </code></pre></div>
 
-<p>And there you have it! Google Visualization Charts right in your Angular application without any worries of bootstrapping the app in the face of a failure to load, unit testing difficulties, or data model restrictions. </p>
+<p>And there you have it! Google Visualization Charts right in your Angular application without any worries of Google Loader failure, unit testing difficulties, or data model restrictions. </p>
 
-<p>Granted, I’m still a beginner to AngularJS (I’ve only been writing Angular apps for 7-8 months now), so if you see any faults here, definitely point it out in the comments below!</p>
+<p>Granted, I’m still a beginner to AngularJS (I’ve only been writing Angular apps for 7-8 months now), so if you see any faults here, definitely point it out in the comments below! For starters, it probably would’ve made more sense to register the Google Loader callback in the service, rather than the controller. Comment if you agree!</p>
 
 <p>-Jon</p>
 

@@ -5,8 +5,8 @@
         <description>Jon the Coding Noob - Jonathan Guerrera</description>
         <link>http://jrrera.github.io</link>
         <link>http://jrrera.github.io</link>
-        <lastBuildDate>2014-04-04T16:24:15-07:00</lastBuildDate>
-        <pubDate>2014-04-04T16:24:15-07:00</pubDate>
+        <lastBuildDate>2014-04-04T16:36:51-07:00</lastBuildDate>
+        <pubDate>2014-04-04T16:36:51-07:00</pubDate>
         <ttl>1800</ttl>
 
 
@@ -19,19 +19,19 @@
 
 &lt;p&gt;As with many people new to Angular, the hardest concept to grok was that of directives. Whenever you’d like to manipulate the dom in some way, a directive is how you do it. Additionally, directives (along with services) are a great way to integrate third party libraries and APIs with Angular.&lt;/p&gt;
 
-&lt;p&gt;I’ve recently been working on a small meditation timer app [LINK] and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with &lt;a href=&quot;http://gavindraper.com/2013/07/30/google-charts-in-angularjs/&quot;&gt;Gavin Draper’s article&lt;/a&gt; on how he did it.&lt;/p&gt;
+&lt;p&gt;I’ve recently been working on a small &lt;a href=&quot;https://github.com/jrrera/minimal-meditation&quot;&gt;meditation timer app&lt;/a&gt; and was having some trouble integrating the Google Charts / Visualization API with AngularJS. I found a solid starting point with &lt;a href=&quot;http://gavindraper.com/2013/07/30/google-charts-in-angularjs/&quot;&gt;Gavin Draper’s article&lt;/a&gt; on how he did it.&lt;/p&gt;
 
-&lt;p&gt;However, I’ve come to find a few disadvantages with that implementation:&lt;/p&gt;
+&lt;p&gt;His code samples were fantastic for getting me up and running. But as I continued to work on the application, I found a few disadvantages with that implementation, and figured it never hurts to improve on the great content of others. Here are a few areas I wanted to work on:&lt;/p&gt;
 
 &lt;h3 id=&quot;bootstrapping-angular&quot;&gt;Bootstrapping Angular&lt;/h3&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;google.setOnLoadCallback(function () {  
-    angular.bootstrap(document.body, [&#39;my-app&#39;]);
-});
-google.load(&#39;visualization&#39;, &#39;1&#39;, {packages: [&#39;corechart&#39;]});
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setOnLoadCallback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  
+    &lt;span class=&quot;nx&quot;&gt;angular&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bootstrap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;my-app&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;visualization&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;1&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;packages&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;corechart&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The given code here works just fine, but I noticed that Angular’s bootstrap function only runs once the Google Loader fires off the callback function.&lt;/p&gt;
+&lt;p&gt;This is the code used to initialize the Angular application in Gavin’s post. The given code here works just fine, but I noticed that Angular’s bootstrap function only runs once the Google Loader fires off the callback function.&lt;/p&gt;
 
 &lt;p&gt;By requiring the Google Loader callback to fire before bootstrapping the Angular application, if the Google Loader ever falters, the app simply won’t run. That felt like an unacceptable trade-off.&lt;/p&gt;
 
@@ -39,24 +39,24 @@ google.load(&#39;visualization&#39;, &#39;1&#39;, {packages: [&#39;corechart&#39
 
 &lt;h3 id=&quot;nested-models&quot;&gt;Nested models&lt;/h3&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;googleChart.directive(&quot;googleChart&quot;,function(){  
-    return{
-        restrict : &quot;A&quot;,
-        link: function($scope, $elem, $attr){
-            var dt = $scope[$attr.ngModel].dataTable;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;directive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;googleChart&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;  
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;restrict&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;A&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;link&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$elem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ngModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataTable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-            var options = {};
-            if($scope[$attr.ngModel].title)
-                options.title = $scope[$attr.ngModel].title;
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ngModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;title&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$scope&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ngModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-            var googleChart = new google.visualization[$attr.googleChart]($elem[0]);
-            googleChart.draw(dt,options)
-        }
-    }
-});
-&lt;/code&gt;&lt;/pre&gt;
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;visualization&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$elem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;googleChart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;draw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The directive wasn’t using Angular’s useful &lt;code&gt;$scope.$eval&lt;/code&gt; for reading attributes. Rather, it was passing the ngModel attribute directly to the &lt;code&gt;$scope&lt;/code&gt; object. If you had a nested model – a best practice in many situations – such as &lt;code&gt;$scope.chartModel.dataset1&lt;/code&gt;, the directive would break by trying to do something like this &lt;code&gt;var dt = $scope[&#39;chartModel.dataset1&#39;].dataTable;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The directive used in Gavin’s article wasn’t utilizing Angular’s useful &lt;code&gt;$scope.$eval&lt;/code&gt; for &lt;a href=&quot;http://stackoverflow.com/questions/15671471/angular-js-how-does-eval-work-and-why-is-it-different-from-vanilla-eval&quot;&gt;reading attributes&lt;/a&gt;. Rather, it was passing the ngModel attribute directly to the &lt;code&gt;$scope&lt;/code&gt; object. If you had a nested model – a best practice in many situations – such as &lt;code&gt;$scope.chartModel.dataset1&lt;/code&gt;, the directive would break by trying to do something like this &lt;code&gt;var dt = $scope[&#39;chartModel.dataset1&#39;].dataTable;&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;As I mentioned, a better approach would be to use &lt;code&gt;$scope.$eval&lt;/code&gt;, which will safely eval the attribute to give you access to the necessary model.&lt;/p&gt;
 
@@ -213,14 +213,14 @@ google.load(&#39;visualization&#39;, &#39;1&#39;, {packages: [&#39;corechart&#39
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;And there you have it! Google Visualization Charts right in your Angular application without any worries of bootstrapping the app in the face of a failure to load, unit testing difficulties, or data model restrictions. &lt;/p&gt;
+&lt;p&gt;And there you have it! Google Visualization Charts right in your Angular application without any worries of Google Loader failure, unit testing difficulties, or data model restrictions. &lt;/p&gt;
 
-&lt;p&gt;Granted, I’m still a beginner to AngularJS (I’ve only been writing Angular apps for 7-8 months now), so if you see any faults here, definitely point it out in the comments below!&lt;/p&gt;
+&lt;p&gt;Granted, I’m still a beginner to AngularJS (I’ve only been writing Angular apps for 7-8 months now), so if you see any faults here, definitely point it out in the comments below! For starters, it probably would’ve made more sense to register the Google Loader callback in the service, rather than the controller. Comment if you agree!&lt;/p&gt;
 
 &lt;p&gt;-Jon&lt;/p&gt;
 </description>
-                <link>http://jrrera.github.io/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts</link>
-                <guid>http://jrrera.github.io/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts</guid>
+                <link>http://jrrera.github.io/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts</link>
+                <guid>http://jrrera.github.io/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts</guid>
                 <pubDate>2014-04-05T00:00:00-07:00</pubDate>
         </item>
 
