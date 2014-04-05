@@ -104,16 +104,16 @@ app.controller('ChartCtrl', function($scope, ChartService) {
 
         google.setOnLoadCallback(function() {
 
-            var dataTable = $scope.dataModel.visual.dataTable;
+            $scope.dataModel.visual.dataTable = new google.visualization.DataTable();
 
             // Set up the dataTable and columns
-            dataTable = new google.visualization.DataTable();
+            var dataTable = $scope.dataModel.visual.dataTable;
             dataTable.addColumn("string","Date")
             dataTable.addColumn("number","Minutes")
             
-            /* 
-             * Populate row data here 
-             */
+            // Populate row data
+            dataTable.addRow(["3/1/14",5]);
+            dataTable.addRow(["3/2/14",13]);
 
             // Update the model to activate the chart on the DOM
             // Note the use of $scope.$apply since we're in the 
@@ -192,7 +192,7 @@ app.directive("googleChart",function(){
                         options = {},
                         chartType = $attr.googleChart;
 
-                    if(model.title) {
+                    if (model.title) {
                         options.title = model.title;
                     }
                     
