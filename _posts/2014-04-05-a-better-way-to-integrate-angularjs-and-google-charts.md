@@ -79,6 +79,7 @@ __DOM__:
     <head>
          <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
          <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+         <!-- Place additional scripts for controller, directives, etc. here -->
     </head>
     <body ng-controller="ChartCtrl">
         <div google-chart="ColumnChart" ng-model="dataModel.visual" trigger="activateChart"></div>
