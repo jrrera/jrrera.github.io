@@ -8,7 +8,7 @@
                 <div class="entry-content">
                     {{ post.content }}
                     <ul class="list-linear">
-                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url={{ site.baseurl}}/{{ post.url }}&text= {{ post.title }}" class="twitter-share-button" data-count="horizontal" data-via="{{ site.author.twitter }}" data-lang="en" data-url="{{ site.baseurl}}/{{ post.url }}">Tweet</a></div></li>
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url={{ site.production_url }}/{{ post.url }}&text= {{ post.title }}" class="twitter-share-button" data-count="horizontal" data-via="{{ site.author.twitter }}" data-lang="en" data-url="{{ site.production_url }}/{{ post.url }}">Tweet</a></div></li>
                         <li><div class="fb-share-button" data-href="{{ post.url }}" data-type="button_count"></div></li>
                         <li><div class="g-plusone" data-size="medium" data-href="{{ post.url }}"></div></li>
                     </ul>
