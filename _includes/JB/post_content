@@ -8,7 +8,7 @@
                 <div class="entry-content">
                     {{ post.content }}
                     <ul class="list-linear">
-                        <li><div class="twitter-tweet"><a href="https://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="{{ site.author.twitter }}" data-lang="en" data-url="http://jrrera.github.io{{ post.url }}">Tweet</a></div></li>
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url={{ site.baseurl}}/{{ post.url }}&text= {{ post.title }}" class="twitter-share-button" data-count="horizontal" data-via="{{ site.author.twitter }}" data-lang="en" data-url="{{ site.baseurl}}/{{ post.url }}">Tweet</a></div></li>
                         <li><div class="fb-share-button" data-href="{{ post.url }}" data-type="button_count"></div></li>
                         <li><div class="g-plusone" data-size="medium" data-href="{{ post.url }}"></div></li>
                     </ul>
@@ -20,4 +20,3 @@
     <hr />
 </article>
 
-https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Fjrrera.github.io%2F&text=Thoughts%20on%20JavaScript%2C%20AngularJS%2C%20and%20more&tw_p=tweetbutton&url=%2Fangularjs%2F2014%2F04%2F05%2Fa-better-way-to-integrate-angularjs-and-google-charts&via=jonguerrera
