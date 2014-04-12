@@ -14,7 +14,6 @@
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.0.6/modernizr.min.js"></script>
 </head>
 <body>
-
 <div id="page" class="hentry">
 	<header class="the-header">
 		<div class="unit-head">
@@ -72,6 +71,8 @@
                 <div class="entry-content">
                     
 <p><img src="/assets/img/AngularJS-large.png" alt="AngularJS" /></p>
+
+<p>Last Updated: 4/12/2014</p>
 
 <p>I’m fairly new to the world of web development (I <a href="http://www.livingforimprovement.com/learning-to-code-fun-frustrating-fruitful/">started coding</a> a year and half ago), and one of my favorite discoveries thus far is AngularJS. </p>
 
@@ -132,14 +133,25 @@
 
 <p><strong>DOM</strong>:</p>
 
-<div class="highlight"><pre><code class="html"><span class="nt">&lt;div</span> <span class="na">google-chart=</span><span class="s">&quot;ColumnChart&quot;</span> <span class="na">ng-model=</span><span class="s">&quot;dataModel.visual&quot;</span> <span class="na">trigger=</span><span class="s">&quot;activateChart&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+<div class="highlight"><pre><code class="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>  
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">&quot;en&quot;</span> <span class="na">ng-app=</span><span class="s">&quot;myApp&quot;</span><span class="nt">&gt;</span>  
+    <span class="nt">&lt;head&gt;</span>
+         <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+         <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://www.google.com/jsapi&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="nt">&lt;/head&gt;</span>
+    <span class="nt">&lt;body</span> <span class="na">ng-controller=</span><span class="s">&quot;ChartCtrl&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">google-chart=</span><span class="s">&quot;ColumnChart&quot;</span> <span class="na">ng-model=</span><span class="s">&quot;dataModel.visual&quot;</span> <span class="na">trigger=</span><span class="s">&quot;activateChart&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+    <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>  
 </code></pre></div>
 
-<p>Note that $scope.activateChart is going to be the trigger to build the chart. </p>
+<p>Note that <code>$scope.activateChart</code> is going to be the trigger to build the chart. </p>
 
 <p><strong>Controller</strong>:</p>
 
-<div class="highlight"><pre><code class="javascript"><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s1">&#39;ChartCtrl&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">ChartService</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><code class="javascript"><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">app</span> <span class="o">||</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;myApp&#39;</span><span class="p">,</span> <span class="p">[]);</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s1">&#39;ChartCtrl&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">ChartService</span><span class="p">)</span> <span class="p">{</span>
     
     <span class="c1">// activateChart flips to true once the Google </span>
     <span class="c1">// Loader callback fires</span>
@@ -163,16 +175,16 @@
 
         <span class="nx">google</span><span class="p">.</span><span class="nx">setOnLoadCallback</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
-            <span class="kd">var</span> <span class="nx">dataTable</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">dataModel</span><span class="p">.</span><span class="nx">visual</span><span class="p">.</span><span class="nx">dataTable</span><span class="p">;</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">dataModel</span><span class="p">.</span><span class="nx">visual</span><span class="p">.</span><span class="nx">dataTable</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">visualization</span><span class="p">.</span><span class="nx">DataTable</span><span class="p">();</span>
 
             <span class="c1">// Set up the dataTable and columns</span>
-            <span class="nx">dataTable</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">google</span><span class="p">.</span><span class="nx">visualization</span><span class="p">.</span><span class="nx">DataTable</span><span class="p">();</span>
+            <span class="kd">var</span> <span class="nx">dataTable</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">dataModel</span><span class="p">.</span><span class="nx">visual</span><span class="p">.</span><span class="nx">dataTable</span><span class="p">;</span>
             <span class="nx">dataTable</span><span class="p">.</span><span class="nx">addColumn</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span>
             <span class="nx">dataTable</span><span class="p">.</span><span class="nx">addColumn</span><span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">,</span><span class="s2">&quot;Minutes&quot;</span><span class="p">)</span>
             
-            <span class="cm">/* </span>
-<span class="cm">             * Populate row data here </span>
-<span class="cm">             */</span>
+            <span class="c1">// Populate row data</span>
+            <span class="nx">dataTable</span><span class="p">.</span><span class="nx">addRow</span><span class="p">([</span><span class="s2">&quot;3/1/14&quot;</span><span class="p">,</span><span class="mi">5</span><span class="p">]);</span>
+            <span class="nx">dataTable</span><span class="p">.</span><span class="nx">addRow</span><span class="p">([</span><span class="s2">&quot;3/2/14&quot;</span><span class="p">,</span><span class="mi">13</span><span class="p">]);</span>
 
             <span class="c1">// Update the model to activate the chart on the DOM</span>
             <span class="c1">// Note the use of $scope.$apply since we&#39;re in the </span>
@@ -249,7 +261,7 @@
                         <span class="nx">options</span> <span class="o">=</span> <span class="p">{},</span>
                         <span class="nx">chartType</span> <span class="o">=</span> <span class="nx">$attr</span><span class="p">.</span><span class="nx">googleChart</span><span class="p">;</span>
 
-                    <span class="k">if</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">title</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">title</span><span class="p">)</span> <span class="p">{</span>
                         <span class="nx">options</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="nx">model</span><span class="p">.</span><span class="nx">title</span><span class="p">;</span>
                     <span class="p">}</span>
                     
@@ -277,6 +289,11 @@
 
 <p>-Jon</p>
 
+                    <ul class="list-linear">
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en">Tweet</a></div></li>
+                        <li><div class="fb-share-button" data-href="/index.html" data-type="button_count"></div></li>
+                        <li><div class="g-plusone" data-size="medium"></div></li>
+                    </ul>
                 </div><!-- entry-content -->
             </div><!-- bd -->
         </div><!-- content -->
@@ -340,6 +357,11 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 
 <p>While I do wonder why RVM / Homebrew was necessary, it seems to be working for others as well. Thought I’d call it out for any others struggling out there, as I had difficulty finding the right clues on Stack Overflow.</p>
 
+                    <ul class="list-linear">
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en">Tweet</a></div></li>
+                        <li><div class="fb-share-button" data-href="/index.html" data-type="button_count"></div></li>
+                        <li><div class="g-plusone" data-size="medium"></div></li>
+                    </ul>
                 </div><!-- entry-content -->
             </div><!-- bd -->
         </div><!-- content -->
@@ -390,6 +412,18 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 		</div><!-- unit-foot -->
 	</footer>
 </div><!-- page -->
+
+<!--Begin Facebook code, instructed to be after opening body tag, but placing down here instead-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=788897974471796";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<!--End Facebook code-->
+
 <script>
 	(function(d, s) {
 		var js, fjs = d.getElementsByTagName(s)[0], load = function(url, id) {
@@ -398,7 +432,7 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 		fjs.parentNode.insertBefore(js, fjs);
 		};
 	load('//platform.twitter.com/widgets.js', 'tweetjs');
-	// load('https://apis.google.com/js/plusone.js', 'gplus1js'); // Checkout http://j.mp/ApDgMr for usage html for this is <div class="g-plusone" data-size="medium"></div>
+	load('https://apis.google.com/js/plusone.js', 'gplus1js'); // Checkout http://j.mp/ApDgMr for usage html for this is <div class="g-plusone" data-size="medium"></div>
 	// load('//connect.facebook.net/en_US/all.js#xfbml=1', 'fbjssdk'); // Checkout http://j.mp/wZw2xR for using open graph protorol html for this is <div class="fb-like" data-href="/index.html" data-send="false" data-layout="button_count" data-width="450" data-show-faces="false" data-font="verdana"></div>
 	}(document, 'script'));
 </script>

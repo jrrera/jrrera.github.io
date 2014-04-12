@@ -14,7 +14,6 @@
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.0.6/modernizr.min.js"></script>
 </head>
 <body>
-
 <div id="page" class="hentry">
 	<header class="the-header">
 		<div class="unit-head">
@@ -148,7 +147,10 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 					<div class="social">
 						<ul class="list-linear">
 							<li><div class="twitter-tweet"><a href="https://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en">Tweet</a></div></li>
+							<li><div class="fb-share-button" data-href="/2014/04/04/installing-jekyll-on-os-x-1092" data-type="button_count"></div></li>
+							<li><div class="g-plusone" data-size="medium"></div></li>
 							<li><div class="twitter-follow"><a href="https://twitter.com/jonguerrera" class="twitter-follow-button" data-show-count="false" data-lang="en"></a></div></li>
+
 						</ul>
 					</div>
 					
@@ -222,6 +224,18 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 		</div><!-- unit-foot -->
 	</footer>
 </div><!-- page -->
+
+<!--Begin Facebook code, instructed to be after opening body tag, but placing down here instead-->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=788897974471796";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<!--End Facebook code-->
+
 <script>
 	(function(d, s) {
 		var js, fjs = d.getElementsByTagName(s)[0], load = function(url, id) {
@@ -230,7 +244,7 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 		fjs.parentNode.insertBefore(js, fjs);
 		};
 	load('//platform.twitter.com/widgets.js', 'tweetjs');
-	// load('https://apis.google.com/js/plusone.js', 'gplus1js'); // Checkout http://j.mp/ApDgMr for usage html for this is <div class="g-plusone" data-size="medium"></div>
+	load('https://apis.google.com/js/plusone.js', 'gplus1js'); // Checkout http://j.mp/ApDgMr for usage html for this is <div class="g-plusone" data-size="medium"></div>
 	// load('//connect.facebook.net/en_US/all.js#xfbml=1', 'fbjssdk'); // Checkout http://j.mp/wZw2xR for using open graph protorol html for this is <div class="fb-like" data-href="/2014/04/04/installing-jekyll-on-os-x-1092" data-send="false" data-layout="button_count" data-width="450" data-show-faces="false" data-font="verdana"></div>
 	}(document, 'script'));
 </script>

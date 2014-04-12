@@ -9,6 +9,8 @@ tags: ['AngularJS', 'Google Visualization API']
 
 ![AngularJS](/assets/img/AngularJS-large.png)
 
+Last Updated: 4/12/2014
+
 
 I'm fairly new to the world of web development (I [started coding](http://www.livingforimprovement.com/learning-to-code-fun-frustrating-fruitful/) a year and half ago), and one of my favorite discoveries thus far is AngularJS. 
 
@@ -72,14 +74,25 @@ Let's start with the DOM and the controller:
 __DOM__:
 
 {% highlight html %}
-<div google-chart="ColumnChart" ng-model="dataModel.visual" trigger="activateChart"></div>
+<!DOCTYPE html>  
+<html lang="en" ng-app="myApp">  
+    <head>
+         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+         <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+    </head>
+    <body ng-controller="ChartCtrl">
+        <div google-chart="ColumnChart" ng-model="dataModel.visual" trigger="activateChart"></div>
+    </body>
+</html>  
 {% endhighlight %}
 
-Note that $scope.activateChart is going to be the trigger to build the chart. 
+Note that `$scope.activateChart` is going to be the trigger to build the chart. 
 
 __Controller__:
 
 {% highlight javascript %}
+var app = app || angular.module('myApp', []);
+
 app.controller('ChartCtrl', function($scope, ChartService) {
     
     // activateChart flips to true once the Google 
