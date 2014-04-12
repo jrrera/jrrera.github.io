@@ -66,3 +66,6 @@ pre .vc { color: #40ffff } /* Name.Variable.Class */
 pre .vg { color: #40ffff } /* Name.Variable.Global */
 pre .vi { color: #40ffff } /* Name.Variable.Instance */
 pre .il { color: #3677a9 } /* Literal.Number.Integer.Long */
+
+/* Added to make my code samples scrollable */
+.highlight pre { display: block; white-space: pre; overflow-x: auto; word-wrap: normal; }
