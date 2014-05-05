@@ -19,10 +19,13 @@ It's nothing special, but here's what I did:
 
 ### Step 1 - Create a simple shell script ###
 
+{% highlight bash %}
 	sudo nano /usr/local/sbin/mysql_check.sh
+{% endhighlight %}	
 
 Then, I wrote the following: 
 
+{% highlight bash %}
 	#!/bin/bash
 	if [[ ! "$(service mysql status)" =~ "start/running" ]]
 	then
@@ -31,28 +34,37 @@ Then, I wrote the following:
 	else
 	    # echo "Looks like MySql is running. No action taken" # Uncomment for debugging
 	fi
+{% endhighlight %}	
 
 Finally, make sure your script is executable:
 
+{% highlight bash %}
 	sudo chmod +x /usr/local/sbin/mysql_check.sh
+{% endhighlight %}	
 
 ### Step 2 - Set up a cron job to check MySQL's status every minute ###
 
 Until I sit down and learn the ins and outs of memcache, I'd prefer that this cron check every minute to make sure MySQL is running. I had to do this in root's crontab, since the commands I'd need the script to run require root.
 
+{% highlight bash %}
 	sudo crontab -e
+{% endhighlight %}	
 
 And within your root crontab:
 
+{% highlight bash %}
 	PATH=/usr/sbin:/usr/bin:/sbin:/bin
 	*/1 * * * * /usr/local/sbin/mysql_check.sh >> /home/jon/cronlog.log 2>&1
+{% endhighlight %}	
 
 I had to add the PATH variable to the script to allow crontab to run the commands in my shell script, such as `service mysql start` as per [this article's discussion](http://ubuntuforums.org/showthread.php?t=2022708).
 
 Just for debugging purposes, I'm routing any output to a log file in my home directory, just to initially measure how often the cron needs to restart MySQL. If you're not curious about this, you can change the above to:
 
+{% highlight bash %}
 	PATH=/usr/sbin:/usr/bin:/sbin:/bin
 	*/1 * * * * /usr/local/sbin/mysql_check.sh
+{% endhighlight %}	
 
 ### Step 3 - Improvement ###
 
