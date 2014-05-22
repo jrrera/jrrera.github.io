@@ -8,5 +8,7 @@ http://jrrera.github.io/rss.xml
 http://jrrera.github.io/sitemap.txt
 http://jrrera.github.io/tags.html
 
+http://jrrera.github.io/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life
+http://jrrera.github.io/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204
 http://jrrera.github.io/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts
 http://jrrera.github.io/2014/04/04/installing-jekyll-on-os-x-1092

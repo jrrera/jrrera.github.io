@@ -54,12 +54,244 @@
 <ul class="posts">
   <!--This code just lists out each posts title next a date with a link. Removing-->
 <!--   
+    <li><span>08 May 2014</span> &raquo; <a href="/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life">Using Google Spreadsheets (or Excel) to Chart Your Success Through Life</a></li>
+  
+    <li><span>05 May 2014</span> &raquo; <a href="/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204">Preventing MySQL from Randomly Stopping on Ubuntu 12.04</a></li>
+  
     <li><span>05 Apr 2014</span> &raquo; <a href="/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts">A Better Way to Integrate AngularJS and Google Charts</a></li>
   
     <li><span>04 Apr 2014</span> &raquo; <a href="/2014/04/04/installing-jekyll-on-os-x-1092">Installing Jekyll on OS X 10.9.2</a></li>
    -->
 
   <!--Added by Jon from: http://stackoverflow.com/questions/9794699/listing-all-the-blog-posts-with-content-with-jekyll-->
+  
+    <article class="unit-article layout-post">
+    <div class="unit-inner unit-article-inner">
+        <div class="content">
+            <div class="bd">
+            	<a href="/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life"><h1>Using Google Spreadsheets (or Excel) to Chart Your Success Through Life</h1></a>
+            	<small>08 May 2014</small>
+            	<hr />
+                <div class="entry-content">
+                    
+<p><em>This post originally appeared in my other blog, <a href="http://www.livingforimprovement.com">Living For Improvement</a>. However, given the technical nature of the lifehack at hand, I decided to cross-post it here. Enjoy!</em></p>
+
+<p><img src="/assets/img/calendar-prototype.png" alt="Life Calendar prototype" /></p>
+
+<p>For years now, I’ve been using a system called <a href="http://www.livingforimprovement.com/key-lifestyle-indicators-a-powerful-tool-for-long-term-success/">Key Lifestyle Indicators</a> (KLIs) that I modeled after the idea of <a href="http://en.wikipedia.org/wiki/Performance_indicator">Key Performance Indicators</a> in business. </p>
+
+<p>My KLI definitions have changed over the years; here’s my current set-up:</p>
+
+<p><img src="/assets/img/klis.png" alt="Key Lifestyle Indicators" /></p>
+
+<p>This system works very well for me, consistently reminding me where I’m slacking and where I’m succeeding. The best part: it requires less than 10 seconds per day to enter the necessary information (nowadays it’s simply 1s and 0s transformed into a moving average).</p>
+
+<p>It wasn’t until this past week that I found a way to leverage this tracked data in a new, interesting way. The inspiration came from reading <a href="http://www.waitbutwhy.com/2014/05/life-weeks.html">Wait But Why’s post</a> on what your life looks like plotted out into weeks (hint: You have less than 4,500 weeks in your life to spend – how have <em>you</em> been using them?). </p>
+
+<p>I loved the idea of a meaningful reminder of the limited number of weeks we have on this planet. Thankfully, Wait But Why offers some <a href="http://store.waitbutwhy.com/collections/posters/products/life-calendar-12x18-hand-screen-printed">sweet calendars</a> that allow you to track how you’re living out your weeks – either with hand-scribbled notes or via color coding. </p>
+
+<p>I’ll probably pick up one of these awesome calendars some time in the near future, but I wondered if I could use my years of KLI data to graphically represent this without needing to create yet <em>another</em> place to track my progress through life. </p>
+
+<p>This post describes how I took my KLI data and created a Wait-But-Why-styled life calendar that lives in Google Spreadsheets (or Excel, if that’s your thing). If you track similar data in a spreadsheet, this article should help you in creating a similar set-up (read <a href="http://www.waitbutwhy.com/2014/05/life-weeks.html">Wait But Why’s post</a> for a deeper understanding of why a life calendar is awesome).</p>
+
+<h3 id="step-1-prototype-the-end-result">Step 1: Prototype the end result</h3>
+
+<p>Here’s what I wanted my life calendar to look like when all was said and done:</p>
+
+<p><img src="/assets/img/calendar-prototype.png" alt="Life Calendar prototype" /></p>
+
+<p>Note how I keep untracked weeks in gray, but everything else is colored yellow, green, or red depending on how my KLIs looked that week. The goal was to have this automatically calculated for me, as manually-inputted tracking can get quite annoying. But in order for this to become automated, I needed to pull together all of the necessary data, which brings me to step 2…</p>
+
+<h3 id="step-2-survey-the-current-datascape">Step 2: Survey the current datascape</h3>
+
+<p>The calendar prototype looked good, but the data I needed was siloed in different cells. In other words, because none of the data was rolled up by day or week, some intermediary data compilation was required before the calendar could pull what it needed. </p>
+
+<p><img src="/assets/img/klis-data.png" alt="Key Lifestyle Indicators" /></p>
+
+<h3 id="step-3-compile-the-calendar-data">Step 3: Compile the calendar data</h3>
+
+<p>After surveying my data, I realized I needed to compile my data in two ways to transition to the life calendar:</p>
+
+<ol>
+  <li>Daily score sums…</li>
+  <li>…rolled up into weekly score sums</li>
+</ol>
+
+<p>I ended up adding two additional columns into my KLI sheet (which I now keep hidden) to accomplish step 1. See below:</p>
+
+<p><img src="/assets/img/new-kli-columns.png" alt="Key Lifestyle Indicators additional columns" /></p>
+
+<p>I calculated the week of my life (Column L) using this formula: <code>=ROUNDDOWN((CURRENT_DATE - DATE_I_WAS_BORN +1)/7)</code>. The +1 in that formula ensures that the calculation includes today’s date when rounding down to the current week. </p>
+
+<p>From there, I summed up each day’s scores using the sum of columns B, C, D, and E. For example, for the day on row 50, the M50 cell contained <code>=B50+C50+D50+E50</code>.</p>
+
+<p>For step 2, I used a pivot table to keep an up-to-date weekly summary of my scores:</p>
+
+<p><img src="/assets/img/kli-weekly-pivot.png" alt="Life Calendar Pivot Table" /></p>
+
+<p>It rolls up all of the scores by week using the two new columns I showed in the previous screenshot. With my daily scores summed and rolled up by week, it was time to link this data to my calendar prototype. </p>
+
+<h3 id="step-4-bring-the-calendar-to-life">Step 4: Bring the calendar to life</h3>
+
+<p>This step was the most time intensive, so I broke into three main tasks:</p>
+
+<h4 id="a-link-the-data-points-to-the-calendar">A. Link the data points to the calendar</h4>
+
+<p>This task involved a VLOOKUP formula to pull the right score based on week. To pull from the right place in the pivot table, I simply needed to calculate the current week and then do the VLOOKUP. It’s a little heavy to look at, but it ended up looking like this: <code>=VLOOKUP(rounddown((CURRENT_YEAR*365)/7 + WEEK_INDEX+1),'Weekly Scores'!$A:$B,2, False)</code></p>
+
+<p><img src="/assets/img/life-calendar-formula.png" alt="Life Calendar Pivot Table" /></p>
+
+<p>Here’s a broader view with cell highlighting. Notice how it uses the Week Index and the current year to calculate the correct week of my life, and then runs the VLOOKUP based on that value:</p>
+
+<p><img src="/assets/img/life-calendar-formula2.png" alt="Life Calendar Pivot Table" /></p>
+
+<h4 id="b-handle-errors">B. Handle errors</h4>
+
+<p>Although the VLOOKUP worked quite well, there were two errors I had to account for:</p>
+
+<ol>
+  <li>
+    <p>The formula returns an error for future weeks that haven’t been calculated yet.</p>
+  </li>
+  <li>
+    <p>A particular oddity with Google Spreadsheets was causing the VLOOKUP to lock the formula in place and make it uneditable (turns out this is a Google Spreadsheets bug when doing a VLOOKUP on pivot tables – hopefully this gets fixed soon). </p>
+  </li>
+</ol>
+
+<p>To solve the first issue, it was rather easy. I wrapped the VLOOKUP in an IFERROR like so:</p>
+
+<p><code>=IFERROR(VLOOKUP_GOES_HERE, "")</code></p>
+
+<p>This made sure that the formula returned an empty string for future weeks, keeping the calendar clean and error-free. </p>
+
+<p>To solve the second issue, I used a trick I found on <a href="http://webapps.stackexchange.com/questions/37556/google-spreadsheets-editing-of-a-vlookup-formula-that-references-a-pivot-table">Stack Exchange</a>. The trick involves arbitrarily adding a +0 to your VLOOKUP calculation. This won’t skew the calculation, obviously, and for some reason keeps the cell formula editable. </p>
+
+<p>Here’s what the VLOOKUP looked like with the +0 added in:</p>
+
+<p><code>VLOOKUP(rounddown((CURRENT_YEAR*365)/7 + WEEK_INDEX+1),'Weekly Scores'!$A:$B,2, False)+0</code></p>
+
+<p>Problem solved!</p>
+
+<p>With both errors handled, the final formula looked like this:</p>
+
+<p><code>=IFERROR(VLOOKUP(rounddown((CURRENT_YEAR*365)/7 + WEEK_INDEX+1),'Weekly Scores'!$A:$B,2, False)+0, "")</code></p>
+
+<h4 id="c-set-up-conditional-formatting-rules">C. Set up conditional formatting rules</h4>
+
+<p>With the hard part out of the way, all I needed to do was make the cells color coded based on my score that week. </p>
+
+<p>In my KLI system, the ideal day would earn me 4 points. Therefore, my ideal week would yield 28 points. With that in mind, here’s how I defined and color-coded great, ok, and bad weeks.</p>
+
+<p><img src="/assets/img/life-cal-formatting.png" alt="Life Calendar Pivot Table" /></p>
+
+<p>As you can see, 20 points or above is a good week, 15-20 points is a so-so week, and anything less is a red flag. Also notice how I alter the text color as well to hide the number calculation that lives in the cell.</p>
+
+<h3 id="step-5-celebrate">Step 5: Celebrate!</h3>
+
+<p>At this point, I took a step back and appreciated my sexy, new life calendar, auto-calculated based on the KLI system I’ve trusted for years. </p>
+
+<p><img src="/assets/img/final-calendar.png" alt="Life Calendar Final Result" /></p>
+
+<p><a href="http://waitbutwhy.com/about">Tim Urban</a>, if you’re reading this post, I just want to say thank you for the inspiration. I follow your blog religiously, and this obviously could not have come about without your wisdom. Cheers mate. </p>
+
+<p>Now, off to appreciate the precious weeks I have left. </p>
+
+                    <ul class="list-linear">
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url=http://jrrera.github.io//2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life&amp;text=Using Google Spreadsheets (or Excel) to Chart Your Success Through Life" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en" data-url="http://jrrera.github.io//2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life">Tweet</a></div></li>
+                        <li><div class="fb-share-button" data-href="/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life" data-type="button_count"></div></li>
+                        <li><div class="g-plusone" data-size="medium" data-href="/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life"></div></li>
+                    </ul>
+                </div><!-- entry-content -->
+            </div><!-- bd -->
+        </div><!-- content -->
+    </div><!-- unit-inner -->
+    <hr />
+    <hr />
+</article>
+
+
+  
+    <article class="unit-article layout-post">
+    <div class="unit-inner unit-article-inner">
+        <div class="content">
+            <div class="bd">
+            	<a href="/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204"><h1>Preventing MySQL from Randomly Stopping on Ubuntu 12.04</h1></a>
+            	<small>05 May 2014</small>
+            	<hr />
+                <div class="entry-content">
+                    
+<p>I recently migrated my WordPress blog from GoDaddy to <a href="http://www.digitalocean.com">Digital Ocean</a>. Digital Ocean is a fantastic way to set up your own server at low cost, but it does require you to do a lot of the maintenance work yourself. </p>
+
+<p>I was able to follow Digital Ocean’s <a href="https://www.digitalocean.com/community/articles/how-to-migrate-wordpress-from-shared-hosting-to-a-cloud-server-with-zero-downtime">guide</a> for migrating my previously existing WordPress blog, <a href="http://www.livingforimprovement.com">LivingForImprovement.com</a>, from GoDaddy to Digital Ocean, but one pain point I couldn’t resolve was MySQL randomly terminating itself due to low memory on my Digital Ocean droplet. Without MySQL running, blog posts couldn’t be fetched when people visited my blog. No bueno :(.</p>
+
+<p><img src="/assets/img/mysql_off.png" alt="My blog isn't happy when MySQL shuts off" /></p>
+
+<p>I made sure a <a href="https://www.digitalocean.com/community/articles/how-to-add-swap-on-ubuntu-12-04">swap file</a> was active on my droplet, but every week or so, MySQL would still terminate itself. Working with memcache also seemed like a viable option, but it looked a little bit over my head. While I do plan to learn memcache eventually, I decided to get my toes wet in the world of shell scripting to help manage the problem until I do.</p>
+
+<p>It’s nothing special, but here’s what I did:</p>
+
+<h3 id="step-1---create-a-simple-shell-script">Step 1 - Create a simple shell script</h3>
+
+<div class="highlight"><pre><code class="bash">sudo nano /usr/local/sbin/mysql_check.sh
+</code></pre></div>
+
+<p>Then, I wrote the following: </p>
+
+<div class="highlight"><pre><code class="bash"><span class="c">#!/bin/bash</span>
+<span class="k">if</span> <span class="o">[[</span> ! <span class="s2">&quot;$(service mysql status)&quot;</span> <span class="o">=</span>~ <span class="s2">&quot;start/running&quot;</span> <span class="o">]]</span>
+<span class="k">then</span>
+<span class="k">    </span>service mysql start
+    <span class="c"># echo &quot;Restarting MySql&quot; # Uncomment for debugging</span>
+<span class="k">else</span>
+    <span class="c"># echo &quot;Looks like MySql is running. No action taken&quot; # Uncomment for debugging</span>
+<span class="k">fi</span>
+</code></pre></div>
+
+<p>Finally, make sure your script is executable:</p>
+
+<div class="highlight"><pre><code class="bash">sudo chmod +x /usr/local/sbin/mysql_check.sh
+</code></pre></div>
+
+<h3 id="step-2---set-up-a-cron-job-to-check-mysqls-status-every-minute">Step 2 - Set up a cron job to check MySQL’s status every minute</h3>
+
+<p>Until I sit down and learn the ins and outs of memcache, I’d prefer that this cron check every minute to make sure MySQL is running. I had to do this in root’s crontab, since the commands I’d need the script to run require root.</p>
+
+<div class="highlight"><pre><code class="bash">sudo crontab -e
+</code></pre></div>
+
+<p>And within your root crontab:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nv">PATH</span><span class="o">=</span>/usr/sbin:/usr/bin:/sbin:/bin
+*/1 * * * * /usr/local/sbin/mysql_check.sh &gt;&gt; /home/jon/cronlog.log 2&gt;<span class="p">&amp;</span>1
+</code></pre></div>
+
+<p>I had to add the PATH variable to the script to allow crontab to run the commands in my shell script, such as <code>service mysql start</code> as per <a href="http://ubuntuforums.org/showthread.php?t=2022708">this article’s discussion</a>.</p>
+
+<p>Just for debugging purposes, I’m routing any output to a log file in my home directory, just to initially measure how often the cron needs to restart MySQL. If you’re not curious about this, you can change the above to:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nv">PATH</span><span class="o">=</span>/usr/sbin:/usr/bin:/sbin:/bin
+*/1 * * * * /usr/local/sbin/mysql_check.sh
+</code></pre></div>
+
+<h3 id="step-3---improvement">Step 3 - Improvement</h3>
+
+<p>I realize that this isn’t the most elegant solution, but it works for now, until I have the bandwidth to learn to use memcache like a boss. Any suggestions / feedback? Leave it in the comments section below. :)</p>
+
+
+                    <ul class="list-linear">
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url=http://jrrera.github.io//2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204&amp;text=Preventing MySQL from Randomly Stopping on Ubuntu 12.04" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en" data-url="http://jrrera.github.io//2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204">Tweet</a></div></li>
+                        <li><div class="fb-share-button" data-href="/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204" data-type="button_count"></div></li>
+                        <li><div class="g-plusone" data-size="medium" data-href="/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204"></div></li>
+                    </ul>
+                </div><!-- entry-content -->
+            </div><!-- bd -->
+        </div><!-- content -->
+    </div><!-- unit-inner -->
+    <hr />
+    <hr />
+</article>
+
+
   
     <article class="unit-article layout-post">
     <div class="unit-inner unit-article-inner">
@@ -291,7 +523,7 @@
 <p>-Jon</p>
 
                     <ul class="list-linear">
-                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url=///angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts&amp;text= A Better Way to Integrate AngularJS and Google Charts" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en" data-url="///angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts">Tweet</a></div></li>
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url=http://jrrera.github.io//angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts&amp;text=A Better Way to Integrate AngularJS and Google Charts" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en" data-url="http://jrrera.github.io//angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts">Tweet</a></div></li>
                         <li><div class="fb-share-button" data-href="/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts" data-type="button_count"></div></li>
                         <li><div class="g-plusone" data-size="medium" data-href="/angularjs/2014/04/05/a-better-way-to-integrate-angularjs-and-google-charts"></div></li>
                     </ul>
@@ -361,7 +593,7 @@ Results logged to /Library/Ruby/Gems/2.0.0/extensions/universal-darwin-13/2.0.0/
 <p>While I do wonder why RVM / Homebrew was necessary, it seems to be working for others as well. Thought I’d call it out for any others struggling out there, as I had difficulty finding the right clues on Stack Overflow.</p>
 
                     <ul class="list-linear">
-                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url=///2014/04/04/installing-jekyll-on-os-x-1092&amp;text= Installing Jekyll on OS X 10.9.2" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en" data-url="///2014/04/04/installing-jekyll-on-os-x-1092">Tweet</a></div></li>
+                        <li><div class="twitter-tweet"><a href="https://twitter.com/share?url=http://jrrera.github.io//2014/04/04/installing-jekyll-on-os-x-1092&amp;text=Installing Jekyll on OS X 10.9.2" class="twitter-share-button" data-count="horizontal" data-via="jonguerrera" data-lang="en" data-url="http://jrrera.github.io//2014/04/04/installing-jekyll-on-os-x-1092">Tweet</a></div></li>
                         <li><div class="fb-share-button" data-href="/2014/04/04/installing-jekyll-on-os-x-1092" data-type="button_count"></div></li>
                         <li><div class="g-plusone" data-size="medium" data-href="/2014/04/04/installing-jekyll-on-os-x-1092"></div></li>
                     </ul>

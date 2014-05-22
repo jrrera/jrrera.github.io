@@ -4,13 +4,209 @@
  <title>Jon the Coding Noob</title>
  <link href="http://jrrera.github.io/" rel="self"/>
  <link href="http://jrrera.github.io"/>
- <updated>2014-04-12T12:29:21-07:00</updated>
+ <updated>2014-05-20T20:04:39-07:00</updated>
  <id>http://jrrera.github.io</id>
  <author>
    <name>Jonathan Guerrera</name>
    <email>jrrera@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Using Google Spreadsheets (or Excel) to Chart Your Success Through Life</title>
+   <link href="http://jrrera.github.io/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life"/>
+   <updated>2014-05-08T00:00:00-07:00</updated>
+   <id>http://jrrera.github.io/2014/05/08/using-google-spreadsheets-or-excel-to-chart-your-success-through-life</id>
+   <content type="html">
+&lt;p&gt;&lt;em&gt;This post originally appeared in my other blog, &lt;a href=&quot;http://www.livingforimprovement.com&quot;&gt;Living For Improvement&lt;/a&gt;. However, given the technical nature of the lifehack at hand, I decided to cross-post it here. Enjoy!&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/calendar-prototype.png&quot; alt=&quot;Life Calendar prototype&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;For years now, I’ve been using a system called &lt;a href=&quot;http://www.livingforimprovement.com/key-lifestyle-indicators-a-powerful-tool-for-long-term-success/&quot;&gt;Key Lifestyle Indicators&lt;/a&gt; (KLIs) that I modeled after the idea of &lt;a href=&quot;http://en.wikipedia.org/wiki/Performance_indicator&quot;&gt;Key Performance Indicators&lt;/a&gt; in business. &lt;/p&gt;
+
+&lt;p&gt;My KLI definitions have changed over the years; here’s my current set-up:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/klis.png&quot; alt=&quot;Key Lifestyle Indicators&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This system works very well for me, consistently reminding me where I’m slacking and where I’m succeeding. The best part: it requires less than 10 seconds per day to enter the necessary information (nowadays it’s simply 1s and 0s transformed into a moving average).&lt;/p&gt;
+
+&lt;p&gt;It wasn’t until this past week that I found a way to leverage this tracked data in a new, interesting way. The inspiration came from reading &lt;a href=&quot;http://www.waitbutwhy.com/2014/05/life-weeks.html&quot;&gt;Wait But Why’s post&lt;/a&gt; on what your life looks like plotted out into weeks (hint: You have less than 4,500 weeks in your life to spend – how have &lt;em&gt;you&lt;/em&gt; been using them?). &lt;/p&gt;
+
+&lt;p&gt;I loved the idea of a meaningful reminder of the limited number of weeks we have on this planet. Thankfully, Wait But Why offers some &lt;a href=&quot;http://store.waitbutwhy.com/collections/posters/products/life-calendar-12x18-hand-screen-printed&quot;&gt;sweet calendars&lt;/a&gt; that allow you to track how you’re living out your weeks – either with hand-scribbled notes or via color coding. &lt;/p&gt;
+
+&lt;p&gt;I’ll probably pick up one of these awesome calendars some time in the near future, but I wondered if I could use my years of KLI data to graphically represent this without needing to create yet &lt;em&gt;another&lt;/em&gt; place to track my progress through life. &lt;/p&gt;
+
+&lt;p&gt;This post describes how I took my KLI data and created a Wait-But-Why-styled life calendar that lives in Google Spreadsheets (or Excel, if that’s your thing). If you track similar data in a spreadsheet, this article should help you in creating a similar set-up (read &lt;a href=&quot;http://www.waitbutwhy.com/2014/05/life-weeks.html&quot;&gt;Wait But Why’s post&lt;/a&gt; for a deeper understanding of why a life calendar is awesome).&lt;/p&gt;
+
+&lt;h3 id=&quot;step-1-prototype-the-end-result&quot;&gt;Step 1: Prototype the end result&lt;/h3&gt;
+
+&lt;p&gt;Here’s what I wanted my life calendar to look like when all was said and done:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/calendar-prototype.png&quot; alt=&quot;Life Calendar prototype&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note how I keep untracked weeks in gray, but everything else is colored yellow, green, or red depending on how my KLIs looked that week. The goal was to have this automatically calculated for me, as manually-inputted tracking can get quite annoying. But in order for this to become automated, I needed to pull together all of the necessary data, which brings me to step 2…&lt;/p&gt;
+
+&lt;h3 id=&quot;step-2-survey-the-current-datascape&quot;&gt;Step 2: Survey the current datascape&lt;/h3&gt;
+
+&lt;p&gt;The calendar prototype looked good, but the data I needed was siloed in different cells. In other words, because none of the data was rolled up by day or week, some intermediary data compilation was required before the calendar could pull what it needed. &lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/klis-data.png&quot; alt=&quot;Key Lifestyle Indicators&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;step-3-compile-the-calendar-data&quot;&gt;Step 3: Compile the calendar data&lt;/h3&gt;
+
+&lt;p&gt;After surveying my data, I realized I needed to compile my data in two ways to transition to the life calendar:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Daily score sums…&lt;/li&gt;
+  &lt;li&gt;…rolled up into weekly score sums&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I ended up adding two additional columns into my KLI sheet (which I now keep hidden) to accomplish step 1. See below:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/new-kli-columns.png&quot; alt=&quot;Key Lifestyle Indicators additional columns&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I calculated the week of my life (Column L) using this formula: &lt;code&gt;=ROUNDDOWN((CURRENT_DATE - DATE_I_WAS_BORN +1)/7)&lt;/code&gt;. The +1 in that formula ensures that the calculation includes today’s date when rounding down to the current week. &lt;/p&gt;
+
+&lt;p&gt;From there, I summed up each day’s scores using the sum of columns B, C, D, and E. For example, for the day on row 50, the M50 cell contained &lt;code&gt;=B50+C50+D50+E50&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;For step 2, I used a pivot table to keep an up-to-date weekly summary of my scores:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/kli-weekly-pivot.png&quot; alt=&quot;Life Calendar Pivot Table&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It rolls up all of the scores by week using the two new columns I showed in the previous screenshot. With my daily scores summed and rolled up by week, it was time to link this data to my calendar prototype. &lt;/p&gt;
+
+&lt;h3 id=&quot;step-4-bring-the-calendar-to-life&quot;&gt;Step 4: Bring the calendar to life&lt;/h3&gt;
+
+&lt;p&gt;This step was the most time intensive, so I broke into three main tasks:&lt;/p&gt;
+
+&lt;h4 id=&quot;a-link-the-data-points-to-the-calendar&quot;&gt;A. Link the data points to the calendar&lt;/h4&gt;
+
+&lt;p&gt;This task involved a VLOOKUP formula to pull the right score based on week. To pull from the right place in the pivot table, I simply needed to calculate the current week and then do the VLOOKUP. It’s a little heavy to look at, but it ended up looking like this: &lt;code&gt;=VLOOKUP(rounddown((CURRENT_YEAR*365)/7 + WEEK_INDEX+1),&#39;Weekly Scores&#39;!$A:$B,2, False)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/life-calendar-formula.png&quot; alt=&quot;Life Calendar Pivot Table&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Here’s a broader view with cell highlighting. Notice how it uses the Week Index and the current year to calculate the correct week of my life, and then runs the VLOOKUP based on that value:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/life-calendar-formula2.png&quot; alt=&quot;Life Calendar Pivot Table&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;b-handle-errors&quot;&gt;B. Handle errors&lt;/h4&gt;
+
+&lt;p&gt;Although the VLOOKUP worked quite well, there were two errors I had to account for:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;The formula returns an error for future weeks that haven’t been calculated yet.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A particular oddity with Google Spreadsheets was causing the VLOOKUP to lock the formula in place and make it uneditable (turns out this is a Google Spreadsheets bug when doing a VLOOKUP on pivot tables – hopefully this gets fixed soon). &lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;To solve the first issue, it was rather easy. I wrapped the VLOOKUP in an IFERROR like so:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;=IFERROR(VLOOKUP_GOES_HERE, &quot;&quot;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This made sure that the formula returned an empty string for future weeks, keeping the calendar clean and error-free. &lt;/p&gt;
+
+&lt;p&gt;To solve the second issue, I used a trick I found on &lt;a href=&quot;http://webapps.stackexchange.com/questions/37556/google-spreadsheets-editing-of-a-vlookup-formula-that-references-a-pivot-table&quot;&gt;Stack Exchange&lt;/a&gt;. The trick involves arbitrarily adding a +0 to your VLOOKUP calculation. This won’t skew the calculation, obviously, and for some reason keeps the cell formula editable. &lt;/p&gt;
+
+&lt;p&gt;Here’s what the VLOOKUP looked like with the +0 added in:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;VLOOKUP(rounddown((CURRENT_YEAR*365)/7 + WEEK_INDEX+1),&#39;Weekly Scores&#39;!$A:$B,2, False)+0&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Problem solved!&lt;/p&gt;
+
+&lt;p&gt;With both errors handled, the final formula looked like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;=IFERROR(VLOOKUP(rounddown((CURRENT_YEAR*365)/7 + WEEK_INDEX+1),&#39;Weekly Scores&#39;!$A:$B,2, False)+0, &quot;&quot;)&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;c-set-up-conditional-formatting-rules&quot;&gt;C. Set up conditional formatting rules&lt;/h4&gt;
+
+&lt;p&gt;With the hard part out of the way, all I needed to do was make the cells color coded based on my score that week. &lt;/p&gt;
+
+&lt;p&gt;In my KLI system, the ideal day would earn me 4 points. Therefore, my ideal week would yield 28 points. With that in mind, here’s how I defined and color-coded great, ok, and bad weeks.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/life-cal-formatting.png&quot; alt=&quot;Life Calendar Pivot Table&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;As you can see, 20 points or above is a good week, 15-20 points is a so-so week, and anything less is a red flag. Also notice how I alter the text color as well to hide the number calculation that lives in the cell.&lt;/p&gt;
+
+&lt;h3 id=&quot;step-5-celebrate&quot;&gt;Step 5: Celebrate!&lt;/h3&gt;
+
+&lt;p&gt;At this point, I took a step back and appreciated my sexy, new life calendar, auto-calculated based on the KLI system I’ve trusted for years. &lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/final-calendar.png&quot; alt=&quot;Life Calendar Final Result&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://waitbutwhy.com/about&quot;&gt;Tim Urban&lt;/a&gt;, if you’re reading this post, I just want to say thank you for the inspiration. I follow your blog religiously, and this obviously could not have come about without your wisdom. Cheers mate. &lt;/p&gt;
+
+&lt;p&gt;Now, off to appreciate the precious weeks I have left. &lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Preventing MySQL from Randomly Stopping on Ubuntu 12.04</title>
+   <link href="http://jrrera.github.io/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204"/>
+   <updated>2014-05-05T00:00:00-07:00</updated>
+   <id>http://jrrera.github.io/2014/05/05/preventing-mysql-from-randomly-stopping-on-ubuntu-1204</id>
+   <content type="html">
+&lt;p&gt;I recently migrated my WordPress blog from GoDaddy to &lt;a href=&quot;http://www.digitalocean.com&quot;&gt;Digital Ocean&lt;/a&gt;. Digital Ocean is a fantastic way to set up your own server at low cost, but it does require you to do a lot of the maintenance work yourself. &lt;/p&gt;
+
+&lt;p&gt;I was able to follow Digital Ocean’s &lt;a href=&quot;https://www.digitalocean.com/community/articles/how-to-migrate-wordpress-from-shared-hosting-to-a-cloud-server-with-zero-downtime&quot;&gt;guide&lt;/a&gt; for migrating my previously existing WordPress blog, &lt;a href=&quot;http://www.livingforimprovement.com&quot;&gt;LivingForImprovement.com&lt;/a&gt;, from GoDaddy to Digital Ocean, but one pain point I couldn’t resolve was MySQL randomly terminating itself due to low memory on my Digital Ocean droplet. Without MySQL running, blog posts couldn’t be fetched when people visited my blog. No bueno :(.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/mysql_off.png&quot; alt=&quot;My blog isn&#39;t happy when MySQL shuts off&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I made sure a &lt;a href=&quot;https://www.digitalocean.com/community/articles/how-to-add-swap-on-ubuntu-12-04&quot;&gt;swap file&lt;/a&gt; was active on my droplet, but every week or so, MySQL would still terminate itself. Working with memcache also seemed like a viable option, but it looked a little bit over my head. While I do plan to learn memcache eventually, I decided to get my toes wet in the world of shell scripting to help manage the problem until I do.&lt;/p&gt;
+
+&lt;p&gt;It’s nothing special, but here’s what I did:&lt;/p&gt;
+
+&lt;h3 id=&quot;step-1---create-a-simple-shell-script&quot;&gt;Step 1 - Create a simple shell script&lt;/h3&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo nano /usr/local/sbin/mysql_check.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, I wrote the following: &lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[[&lt;/span&gt; ! &lt;span class=&quot;s2&quot;&gt;&amp;quot;$(service mysql status)&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;~ &lt;span class=&quot;s2&quot;&gt;&amp;quot;start/running&amp;quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;then&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;    &lt;/span&gt;service mysql start
+    &lt;span class=&quot;c&quot;&gt;# echo &amp;quot;Restarting MySql&amp;quot; # Uncomment for debugging&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# echo &amp;quot;Looks like MySql is running. No action taken&amp;quot; # Uncomment for debugging&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, make sure your script is executable:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo chmod +x /usr/local/sbin/mysql_check.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;step-2---set-up-a-cron-job-to-check-mysqls-status-every-minute&quot;&gt;Step 2 - Set up a cron job to check MySQL’s status every minute&lt;/h3&gt;
+
+&lt;p&gt;Until I sit down and learn the ins and outs of memcache, I’d prefer that this cron check every minute to make sure MySQL is running. I had to do this in root’s crontab, since the commands I’d need the script to run require root.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;sudo crontab -e
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And within your root crontab:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/sbin:/usr/bin:/sbin:/bin
+*/1 * * * * /usr/local/sbin/mysql_check.sh &amp;gt;&amp;gt; /home/jon/cronlog.log 2&amp;gt;&lt;span class=&quot;p&quot;&gt;&amp;amp;&lt;/span&gt;1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;I had to add the PATH variable to the script to allow crontab to run the commands in my shell script, such as &lt;code&gt;service mysql start&lt;/code&gt; as per &lt;a href=&quot;http://ubuntuforums.org/showthread.php?t=2022708&quot;&gt;this article’s discussion&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Just for debugging purposes, I’m routing any output to a log file in my home directory, just to initially measure how often the cron needs to restart MySQL. If you’re not curious about this, you can change the above to:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/sbin:/usr/bin:/sbin:/bin
+*/1 * * * * /usr/local/sbin/mysql_check.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;step-3---improvement&quot;&gt;Step 3 - Improvement&lt;/h3&gt;
+
+&lt;p&gt;I realize that this isn’t the most elegant solution, but it works for now, until I have the bandwidth to learn to use memcache like a boss. Any suggestions / feedback? Leave it in the comments section below. :)&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>A Better Way to Integrate AngularJS and Google Charts</title>
